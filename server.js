@@ -3,7 +3,12 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
+const { randomBytes, createHash } = require('crypto');
 const Games = require('./game-engine');
+const Players = require('./player-profile');
+
+const SESSION_COOKIE = 'cq_session';
+const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
 
 async function createApp({ databaseFile = path.join(__dirname, 'cameroon_quest.db') } = {}) {
     const db = await new Promise((resolve, reject) => {
@@ -64,14 +69,54 @@ async function createApp({ databaseFile = path.join(__dirname, 'cameroon_quest.d
     const app = express();
     app.disable('x-powered-by');
     app.use(express.json({ limit: '16kb' }));
-    const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res)).catch(next);
+    const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
     const validText = (value, min, max) => typeof value === 'string' && value.length >= min && value.length <= max;
     const publicUser = user => ({
-        id: user.id, username: user.username, avatar: user.avatar, region: user.region, lives: user.lives, xp: user.xp
+        id: user.id, username: user.username, avatar: user.avatar, region: user.region,
+        lives: user.lives, xp: user.xp, level: Players.levelProgress(user.xp).level
+    });
+    const rankedPlayer = user => ({
+        id: user.id, username: user.username, avatar: user.avatar, region: user.region,
+        xp: user.xp, rank: user.rank, level: Players.levelProgress(user.xp).level
+    });
+    const cookieOptions = req => ({ httpOnly: true, sameSite: 'strict', secure: req.secure, path: '/' });
+    function sessionHash(req) {
+        const cookie = (req.headers.cookie || '').split(';').map(value => value.trim())
+            .find(value => value.startsWith(`${SESSION_COOKIE}=`));
+        const token = cookie?.slice(SESSION_COOKIE.length + 1);
+        return token && /^[a-f0-9]{64}$/.test(token) ? createHash('sha256').update(token).digest('hex') : null;
+    }
+    async function sessionUser(req) {
+        const hash = sessionHash(req);
+        if (!hash) return null;
+        return get(`SELECT users.id, username, avatar, region, lives, xp FROM users
+            JOIN sessions ON sessions.user_id = users.id WHERE token_hash = ? AND expires_at > ?`, [hash, Date.now()]);
+    }
+    async function newSession(req, userId) {
+        const previousHash = sessionHash(req);
+        await run('DELETE FROM sessions WHERE expires_at <= ? OR token_hash = ?', [Date.now(), previousHash]);
+        const token = randomBytes(32).toString('hex');
+        await run('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)',
+            [createHash('sha256').update(token).digest('hex'), userId, Date.now() + SESSION_DURATION]);
+        return token;
+    }
+    const requireSession = asyncRoute(async (req, res, next) => {
+        const user = await sessionUser(req);
+        if (!user) return res.status(401).json({ error: 'Your session has ended. Please log in again.' });
+        req.user = user;
+        next();
+    });
+    async function rankForUser(user) {
+        const { rank } = await get('SELECT COUNT(*) + 1 AS rank FROM users WHERE xp > ?', [user.xp]);
+        return rankedPlayer({ ...user, rank });
+    }
+    app.use('/api', (_req, res, next) => {
+        res.set('Cache-Control', 'no-store');
+        next();
     });
 
     app.get(['/', '/index.html'], (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-    for (const file of ['style.css', 'app.js', 'game-engine.js']) {
+    for (const file of ['style.css', 'app.js', 'game-engine.js', 'player-profile.js']) {
         app.get(`/${file}`, (_req, res) => res.sendFile(path.join(__dirname, file)));
     }
     app.get(['/CameroonQuest', '/CameroonQuest/', '/CameroonQuest/index.html'], (_req, res) => res.redirect(302, '/'));
@@ -85,11 +130,13 @@ async function createApp({ databaseFile = path.join(__dirname, 'cameroon_quest.d
         const normalizedName = username.trim();
         const hash = await bcrypt.hash(password, 10);
         try {
-            const result = await transaction(() => run(
-                'INSERT INTO users (username, password_hash, avatar, region, lives, xp) VALUES (?, ?, ?, ?, 5, 0)',
-                [normalizedName, hash, avatar, region]
-            ));
-            res.json({ id: result.lastID, username: normalizedName, avatar, region, lives: 5, xp: 0 });
+            const result = await transaction(async () => {
+                const inserted = await run('INSERT INTO users (username, password_hash, avatar, region, lives, xp) VALUES (?, ?, ?, ?, 5, 0)',
+                    [normalizedName, hash, avatar, region]);
+                return { id: inserted.lastID, token: await newSession(req, inserted.lastID) };
+            });
+            res.cookie(SESSION_COOKIE, result.token, { ...cookieOptions(req), maxAge: SESSION_DURATION });
+            res.json(publicUser({ id: result.id, username: normalizedName, avatar, region, lives: 5, xp: 0 }));
         } catch (error) {
             if (error.code === 'SQLITE_CONSTRAINT' && error.message.includes('users.username')) {
                 return res.status(400).json({ error: 'That player name is already in use.' });
@@ -107,20 +154,83 @@ async function createApp({ databaseFile = path.join(__dirname, 'cameroon_quest.d
         if (!user || !await bcrypt.compare(password, user.password_hash)) {
             return res.status(401).json({ error: 'Invalid player name or password.' });
         }
+        const token = await transaction(() => newSession(req, user.id));
+        res.cookie(SESSION_COOKIE, token, { ...cookieOptions(req), maxAge: SESSION_DURATION });
         res.json(publicUser(user));
     }));
 
-    app.get('/api/user/:id/progress', asyncRoute(async (req, res) => {
-        const id = Number(req.params.id);
-        if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid player ID.' });
-        const user = await get('SELECT id, username, avatar, region, lives, xp FROM users WHERE id = ?', [id]);
-        if (!user) return res.status(404).json({ error: 'Player not found.' });
-        const scores = await all('SELECT game_name, difficulty, score, status, played_at FROM scores WHERE user_id = ? ORDER BY played_at DESC', [id]);
-        res.json({ user, scores });
+    app.get('/api/session', asyncRoute(async (req, res) => {
+        const user = await sessionUser(req);
+        res.json({ user: user ? publicUser(user) : null });
     }));
 
-    app.post('/api/scores', asyncRoute(async (req, res) => {
-        const { user_id, game_name, difficulty, score, status, mode = 'solo' } = req.body || {};
+    app.post('/api/logout', asyncRoute(async (req, res) => {
+        const hash = sessionHash(req);
+        if (hash) await transaction(() => run('DELETE FROM sessions WHERE token_hash = ?', [hash]));
+        res.clearCookie(SESSION_COOKIE, cookieOptions(req));
+        res.json({ success: true });
+    }));
+
+    app.get('/api/profile', requireSession, asyncRoute(async (req, res) => {
+        const profile = await transaction(async () => {
+            const user = await get('SELECT id, username, avatar, region, lives, xp FROM users WHERE id = ?', [req.user.id]);
+            const ranking = await rankForUser(user);
+            const bestScores = await all('SELECT game_name, MAX(score) AS score FROM scores WHERE user_id = ? GROUP BY game_name', [user.id]);
+            return { user: publicUser(user), rank: ranking.rank, progress: Players.levelProgress(user.xp), bestScores };
+        });
+        res.json(profile);
+    }));
+
+    app.patch('/api/profile/avatar', requireSession, asyncRoute(async (req, res) => {
+        const { avatar_id } = req.body || {};
+        const avatar = Players.AVATARS.find(item => item.id === avatar_id);
+        if (!avatar || Object.keys(req.body).some(key => key !== 'avatar_id')) {
+            return res.status(400).json({ error: 'Choose a regional avatar. XP, player identity, and level cannot be edited.' });
+        }
+        const user = await transaction(async () => {
+            await run('UPDATE users SET avatar = ?, region = ? WHERE id = ?', [avatar.icon, avatar.region, req.user.id]);
+            return get('SELECT id, username, avatar, region, lives, xp FROM users WHERE id = ?', [req.user.id]);
+        });
+        res.json({ user: publicUser(user) });
+    }));
+
+    app.get('/api/rankings', asyncRoute(async (req, res) => {
+        const { limit = '10', offset = '0' } = req.query;
+        if (typeof limit !== 'string' || typeof offset !== 'string' || !/^\d+$/.test(limit) || !/^\d+$/.test(offset) ||
+            !Number.isSafeInteger(Number(limit)) || Number(limit) < 1 || Number(limit) > 50 ||
+            !Number.isSafeInteger(Number(offset)) || Number(offset) > 1000000) {
+            return res.status(400).json({ error: 'Use a ranking limit from 1 to 50 and a non-negative offset up to 1000000.' });
+        }
+        const user = await sessionUser(req);
+        const rankings = await transaction(async () => {
+            const { total } = await get('SELECT COUNT(*) AS total FROM users');
+            const rows = await all(`WITH ranked_users AS (
+                SELECT id, username, avatar, region, xp, RANK() OVER (ORDER BY xp DESC) AS rank FROM users
+            ) SELECT * FROM ranked_users ORDER BY xp DESC, id ASC LIMIT ? OFFSET ?`, [Number(limit), Number(offset)]);
+            const current = user ? await get('SELECT id, username, avatar, region, xp FROM users WHERE id = ?', [user.id]) : null;
+            return {
+                players: rows.map(rankedPlayer), total, limit: Number(limit), offset: Number(offset),
+                currentPlayer: current ? await rankForUser(current) : null
+            };
+        });
+        res.json(rankings);
+    }));
+
+    app.get('/api/user/:id/progress', requireSession, asyncRoute(async (req, res) => {
+        const id = Number(req.params.id);
+        if (!Number.isSafeInteger(id) || id <= 0) return res.status(400).json({ error: 'Invalid player ID.' });
+        if (id !== req.user.id) return res.status(403).json({ error: 'You can only access your own progress.' });
+        const progress = await transaction(async () => {
+            const user = await get('SELECT id, username, avatar, region, lives, xp FROM users WHERE id = ?', [id]);
+            const scores = await all('SELECT game_name, difficulty, score, status, played_at FROM scores WHERE user_id = ? ORDER BY played_at DESC', [id]);
+            return { user: publicUser(user), scores };
+        });
+        res.json(progress);
+    }));
+
+    app.post('/api/scores', requireSession, asyncRoute(async (req, res) => {
+        const { user_id = req.user.id, game_name, difficulty, score, status, mode = 'solo' } = req.body || {};
+        if (user_id !== req.user.id) return res.status(403).json({ error: 'You can only save scores to your own profile.' });
         const maximum = { songo: 1000, pirogue: 1000, dochi: 450, quiz: 250 };
         if (!Number.isSafeInteger(user_id) || user_id <= 0 || !Object.hasOwn(maximum, game_name) ||
             !['easy', 'medium', 'hard'].includes(difficulty) || !Number.isInteger(score) || score < 0 || score > maximum[game_name] ||
@@ -140,7 +250,7 @@ async function createApp({ databaseFile = path.join(__dirname, 'cameroon_quest.d
             return get('SELECT lives, xp FROM users WHERE id = ?', [user_id]);
         });
         if (!updatedUser) return res.status(404).json({ error: 'Player not found; no score was saved.' });
-        res.json({ success: true, updatedUser });
+        res.json({ success: true, updatedUser: { ...updatedUser, level: Players.levelProgress(updatedUser.xp).level } });
     }));
 
     app.get('/api/quiz', asyncRoute(async (_req, res) => {

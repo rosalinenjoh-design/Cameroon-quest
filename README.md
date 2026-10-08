@@ -28,9 +28,45 @@ Optional environment variables:
 - Choose **Quick Guest Play** to play without an account. The name field is optional for guests; the default is Guest Warrior.
 - Guest XP, hearts, avatar, and best scores are saved in that browser's local storage. Storage failures are shown explicitly; private browsing or clearing site data can remove progress.
 - Existing username/password accounts still work. New passwords require at least eight characters. No email address is collected.
+- Account login creates a seven-day, HttpOnly, SameSite=Strict session cookie. Reloading restores an active session; **Switch player** invalidates it on the server. Cookies use Secure when served directly over HTTPS.
 - Local Player 2 chooses a display name and does not need an account. Only Player 1's profile receives XP, hearts, and saved scores.
 - Hearts track solo outcomes; zero hearts do **not** lock players out. Correct quiz answers and Dochi victories can restore hearts, up to five. Local multiplayer losses do not deduct hearts.
 - Every 250 XP advances the displayed level. There is no cosmetic coin balance or nonfunctional shop.
+
+## Profile, levels, and rankings
+
+Use the **Games / Profile / Rankings** navigation above the main content. The header avatar also opens your profile. Navigation is hidden during a round so changing pages cannot leave a game running in the background.
+
+### Profile and avatars
+
+- The profile shows total XP, current level, hearts, global rank for accounts, personal bests, and progress toward the next level.
+- Preview any of the ten regional avatars, then select **Save avatar**. The matching region changes with the avatar; XP, level, and scores never change.
+- Account avatar changes are stored in SQLite and appear in rankings and future sessions. Guest changes stay in the browser. Cancelling discards the preview.
+- Failed loads/saves show an explicit message and retry guidance rather than claiming success. Only the signed-in account can edit its profile or submit its scores.
+
+### Level thresholds
+
+The same shared calculation is used by the header, profile, game-result notice, and ranking API:
+
+| Total XP | Level | XP remaining until the next level |
+| --- | --- | --- |
+| 0 | 1 | 250 |
+| 249 | 1 | 1 |
+| 250 | 2 | 250 |
+| 499 | 2 | 1 |
+| 500 | 3 | 250 |
+
+Formula: `level = 1 + floor(totalXP / 250)`. Levels are derived from XP, not separately stored or user-editable. A completed, saved round that crosses a threshold displays a level-up notice.
+
+### Ranking rules
+
+- Only registered accounts appear on the global board, ordered by total XP descending. Guest XP is not uploaded or merged into an account.
+- Equal XP gives the same competition rank (for example `1, 1, 3`). Ties are displayed in stable account-ID order.
+- Rankings show ten players per page, plus your own rank even when you are outside the displayed page. Your row is highlighted.
+- Opening the page or selecting **Refresh** fetches current data. Empty rankings and connection failures have different states.
+- The public board contains only display name, avatar, region, XP, level, and rank/ID, not passwords, session tokens, or private score history.
+
+New endpoints: `GET /api/session`, `POST /api/logout`, `GET /api/profile`, `PATCH /api/profile/avatar` with `{ "avatar_id": "dolphin" }`, and `GET /api/rankings?limit=10&offset=0`. Profile, avatar, progress, and score mutations require the authenticated session; player IDs cannot be used to access another account.
 
 ## Games and controls
 
@@ -56,7 +92,7 @@ This is the requested **five-pit-per-side arcade adaptation**, not a traditional
 
 ### Pirogue Regatta
 
-Boats paddle automatically at equal base speed. Each player sees an independent view of the same obstacle course. Hold a direction to avoid logs; a collision applies a 1.35-second slowdown once per obstacle. The first boat to finish wins, with precise finish-time comparison for draws. Difficulty changes speed, course length, obstacle spacing, and AI anticipation.
+Boats paddle automatically at equal base speed. Each player sees an independent view of the same obstacle course. Hold a direction to avoid logs; a collision applies a 1.35-second slowdown once per obstacle. The first boat to finish wins, with precise finish-time comparison for draws. Difficulty changes speed, course length, obstacle spacing, and AI anticipation. The AI can miss a log, so a clean human run can win rather than only tie a perfect opponent.
 
 ### Dochi
 
@@ -76,18 +112,21 @@ npm test
 
 Tests use Node's built-in test runner, deterministic game simulations, in-memory SQLite, and disposable databases. They cover rule invariants, game endings, AI moves, fair local racing, frame-rate independence, quiz turn-taking, score transactions, invalid inputs, seeding, and public asset routing. Existing project databases are not used by tests.
 
+Profile tests cover exact 250-XP boundaries, shared avatar data, avatar ownership/persistence, session rotation/expiry/logout, ranking order, ties across page boundaries, current-player placement, and rejection of XP edits.
+
 ## Project structure
 
 - [index.html](index.html): accessible screens, dialogs, board, and game controls.
 - [style.css](style.css): responsive screenshot-inspired styling.
 - [app.js](app.js): screen lifecycle, rendering, input, guest storage, and API integration.
 - [game-engine.js](game-engine.js): independently testable game rules and shared rewards/question bank.
+- [player-profile.js](player-profile.js): shared regional avatar catalog and 250-XP level progression.
 - [server.js](server.js): Express API and public asset routes.
 - [schema.sql](schema.sql): SQLite table definitions; existing profiles/scores are preserved.
 - [tests](tests): game and API regression tests.
 
 ## Release limitations and UI recommendations
 
-This is still a **local/demo application**, not a secured competitive service. Although passwords are hashed, inputs are checked, rewards are calculated consistently, and private project files are no longer public static assets, the existing account API still identifies users by ID rather than an authenticated server session. Game outcomes are client-reported. Add authenticated sessions, ownership checks, rate limits, and server-validated results before exposing it publicly.
+This is still a **local/demo application**, not a cheat-resistant competitive service. Passwords are hashed, authenticated sessions enforce account ownership, rewards are calculated consistently, and private project files are not public static assets. However, game outcomes are still client-reported. Before public deployment, add server-validated/idempotent game results, authentication rate limits, HTTPS with correctly configured secure cookies behind any proxy, and operational monitoring. Cookie tokens are random and only their hashes are stored in SQLite.
 
 The interface incorporates large touch targets, visible keyboard focus, readable contrast, labeled controls, responsive header/cards, honest save/error messages, in-page quizzes/results, and reduced-motion support. Useful next product improvements are English/French localization, community review of cultural content and game variants, more region-specific questions, and a short first-play tutorial. Canvas action games are not a complete screen-reader-accessible gameplay experience.

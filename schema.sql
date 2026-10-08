@@ -33,4 +33,14 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
     correct_answer TEXT NOT NULL -- 'A', 'B', 'C', 'D'
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+    token_hash TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS users_xp_ranking ON users(xp DESC, id ASC);
+
 -- server.js seeds the shared question bank from game-engine.js without duplicating questions.

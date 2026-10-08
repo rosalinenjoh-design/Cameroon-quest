@@ -12,6 +12,10 @@
 - Dark screenshot-inspired shell with Cameroon green/red/yellow accents.
 - Regional avatar, XP, level, and hearts; no nonfunctional currency or email field.
 - Existing account login/registration plus browser-persisted guest play.
+- Profile and ranking pages with explicit Games/Profile/Rankings navigation outside active games.
+- Preview/save/cancel avatar editing for ten regional avatars; account changes persist in SQLite, guest changes in browser storage.
+- Shared level rule: one level per 250 XP, starting at Level 1; exact progress/remaining XP and a saved-result level-up notice.
+- Registered-player XP rankings with competition ties, stable pagination, own-player highlighting, and loading/empty/error states. Guests are unranked.
 - Game setup, mode selection, local Player 2 name, rules, pause/resume, exit/restart confirmation, and results with explicit save status.
 - Mobile layouts, multi-touch buttons, keyboard focus, labeled inputs, reduced motion, and no required external font/CDN services.
 
@@ -32,10 +36,12 @@
 - Quiz loading/answer requests are cancelled when their round is abandoned.
 - Startup seeds missing quiz questions without adding duplicates; quiz requests also suppress legacy duplicate questions.
 - Score insertion and XP/hearts updates are atomic and errors are surfaced.
+- Seven-day HttpOnly, SameSite=Strict sessions restore accounts across reloads; logout invalidates the session. Profile/score changes and private progress access are restricted to the signed-in account.
+- Levels are calculated from stored XP, never separately editable. Avatar edits do not alter XP, hearts, level, or scores.
 
 ## Non-goals and release requirements
 
 - Multiplayer is not online and does not connect separate devices.
 - The five-pit Songo adaptation does not claim traditional/tournament accuracy.
-- The retained ID-based account API needs authenticated sessions and ownership checks before public deployment. Client-reported game outcomes are not cheat-resistant.
+- The authenticated account API still needs production rate limiting, HTTPS/cookie deployment configuration, and server-validated/idempotent game results. Client-reported outcomes are not cheat-resistant.
 - See [README.md](README.md) for setup, controls, rules, tests, and follow-up UI recommendations.

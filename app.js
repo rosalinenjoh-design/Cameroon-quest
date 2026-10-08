@@ -1,21 +1,11 @@
 'use strict';
 
 const Games = window.QuestGames;
+const Players = window.QuestPlayers;
 const API_URL = '/api';
 const GUEST_KEY = 'cameroonquest.guest.v1';
 const $ = id => document.getElementById(id);
-const AVATARS = [
-    { icon: '🦁', region: 'Centre (Yaounde)' },
-    { icon: '🐬', region: 'Littoral (Douala)' },
-    { icon: '🐃', region: 'West (Bafoussam)' },
-    { icon: '🐂', region: 'Adamawa (Ngaoundere)' },
-    { icon: '🐘', region: 'North (Garoua)' },
-    { icon: '🐪', region: 'Far North (Maroua)' },
-    { icon: '🦍', region: 'East (Bertoua)' },
-    { icon: '🐆', region: 'South (Ebolowa)' },
-    { icon: '🐎', region: 'North-West (Bamenda)' },
-    { icon: '🐒', region: 'South-West (Buea)' }
-];
+const AVATARS = Players.AVATARS;
 const GAME_INFO = {
     songo: { title: 'Songo Board', region: 'Centre / Beti-inspired arcade', description: 'A game of patience and strategy. Sow seeds and capture more than your opponent.', maxScore: 1000 },
     pirogue: { title: 'Pirogue Regatta', region: 'Littoral / Wouri River', description: 'Both boats paddle automatically. Steer around logs: each collision slows you down.', maxScore: 1000 },
@@ -61,6 +51,15 @@ let pendingConfirmation = null;
 let progressVersion = 0;
 let soundEnabled = false;
 let audioContext = null;
+let accountBusy = false;
+let pageRequest = null;
+let profileLoading = false;
+let profileSaving = false;
+let profileRank = null;
+let draftAvatarId = null;
+let rankingOffset = 0;
+let rankingTotal = 0;
+const RANKING_PAGE_SIZE = 10;
 
 function emptyBests() {
     return { songo: 0, pirogue: 0, dochi: 0, quiz: 0 };
@@ -89,7 +88,7 @@ async function api(route, { method = 'GET', body, signal } = {}) {
     }, 12000);
     try {
         const response = await fetch(`${API_URL}${route}`, {
-            method, signal: controller.signal,
+            method, signal: controller.signal, credentials: 'same-origin',
             headers: body ? { 'Content-Type': 'application/json' } : undefined,
             body: body ? JSON.stringify(body) : undefined
         });
@@ -109,7 +108,10 @@ async function api(route, { method = 'GET', body, signal } = {}) {
 }
 
 function showScreen(id) {
+    pageRequest?.abort();
+    pageRequest = null;
     document.querySelectorAll('.screen').forEach(screen => { screen.hidden = screen.id !== id; });
+    renderNavigation();
     $('mainContent').focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -119,7 +121,28 @@ function renderHeader() {
     $('userDisplayName').textContent = currentUser?.username || 'Guest Player';
     $('userXp').textContent = (currentUser?.xp || 0).toLocaleString();
     $('userLives').textContent = currentUser?.lives ?? 5;
-    $('playerLevel').textContent = `Level ${1 + Math.floor((currentUser?.xp || 0) / 250)}`;
+    $('playerLevel').textContent = `Level ${Players.levelProgress(currentUser?.xp ?? 0).level}`;
+    renderNavigation();
+}
+
+function renderNavigation() {
+    const screen = document.querySelector('.screen:not([hidden])')?.id;
+    $('appNavigation').hidden = !currentUser || screen === 'gameScreen';
+    document.querySelectorAll('[data-view]').forEach(button => {
+        if (button.dataset.view === screen) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+        button.disabled = accountBusy || profileSaving;
+    });
+    $('playerAvatar').disabled = !currentUser || Boolean(match) || accountBusy || profileSaving;
+    $('logoutButton').disabled = accountBusy || profileSaving;
+    document.querySelectorAll('[data-game]').forEach(button => { button.disabled = accountBusy; });
+}
+
+function navigateTo(view) {
+    if (!currentUser || match || accountBusy || profileSaving) return;
+    if (view === 'profileScreen') openProfile();
+    else if (view === 'rankingsScreen') openRankings();
+    else returnToMenu();
 }
 
 function renderDashboard() {
@@ -142,6 +165,8 @@ async function refreshProgress() {
         if (!data.user || !Array.isArray(data.scores)) throw new Error('The server returned invalid progress data.');
         currentUser.lives = data.user.lives;
         currentUser.xp = data.user.xp;
+        currentUser.avatar = data.user.avatar;
+        currentUser.region = data.user.region;
         bestScores = emptyBests();
         for (const score of data.scores) {
             if (Object.hasOwn(bestScores, score.game_name)) bestScores[score.game_name] = Math.max(bestScores[score.game_name], score.score);
@@ -153,8 +178,8 @@ async function refreshProgress() {
     }
 }
 
-function saveGuest() {
-    localStorage.setItem(GUEST_KEY, JSON.stringify({ version: 1, user: currentUser, bests: bestScores }));
+function saveGuest(user = currentUser) {
+    localStorage.setItem(GUEST_KEY, JSON.stringify({ version: 1, user, bests: bestScores }));
 }
 
 function startGuest() {
@@ -171,6 +196,7 @@ function startGuest() {
                 !saved.bests || Object.keys(emptyBests()).some(game => !Number.isFinite(saved.bests[game]) || saved.bests[game] < 0)) {
                 throw new Error('The saved guest profile has an unsupported format.');
             }
+            Players.levelProgress(saved.user.xp);
         }
     } catch (error) {
         saved = null;
@@ -187,6 +213,7 @@ function startGuest() {
         currentUser.avatar = avatar.icon;
         currentUser.region = avatar.region;
     }
+    avatarChanged = false;
     $('passwordInput').value = '';
     try { saveGuest(); } catch (error) { reportError('Browser storage is unavailable; progress will last only for this session.', error); }
     renderHeader();
@@ -194,8 +221,43 @@ function startGuest() {
     showScreen('dashboardScreen');
 }
 
+async function activateAccount(data) {
+    if (!Number.isSafeInteger(data?.id) || data.id <= 0 || !Number.isInteger(data.lives) ||
+        data.lives < 0 || data.lives > 5 || typeof data.username !== 'string' ||
+        typeof data.avatar !== 'string' || typeof data.region !== 'string') {
+        throw new Error('The server returned an invalid player profile.');
+    }
+    Players.levelProgress(data.xp);
+    currentUser = { ...data, isGuest: false };
+    bestScores = emptyBests();
+    $('passwordInput').value = '';
+    notice('');
+    renderHeader();
+    renderDashboard();
+    showScreen('dashboardScreen');
+    await refreshProgress();
+}
+
+async function restoreSession() {
+    accountBusy = true;
+    ['authSubmit', 'authModeToggle', 'guestPlay'].forEach(id => { $(id).disabled = true; });
+    notice('Checking your saved session...');
+    try {
+        const data = await api('/session');
+        if (data.user) await activateAccount(data.user);
+        else notice('');
+    } catch (error) {
+        reportError('Could not restore an account session. You can log in or play as a guest.', error);
+    } finally {
+        accountBusy = false;
+        ['authSubmit', 'authModeToggle', 'guestPlay'].forEach(id => { $(id).disabled = false; });
+        renderNavigation();
+    }
+}
+
 async function authenticate(event) {
     event.preventDefault();
+    accountBusy = true;
     $('authError').hidden = true;
     const buttons = ['authSubmit', 'authModeToggle', 'guestPlay'];
     buttons.forEach(id => { $(id).disabled = true; });
@@ -206,22 +268,288 @@ async function authenticate(event) {
             method: 'POST',
             body: { username: $('usernameInput').value.trim(), password: $('passwordInput').value, avatar: avatar.icon, region: avatar.region }
         });
-        if (!Number.isInteger(data.id) || !Number.isFinite(data.xp) || !Number.isInteger(data.lives)) throw new Error('The server returned an invalid player profile.');
-        currentUser = { ...data, isGuest: false };
-        bestScores = emptyBests();
-        $('passwordInput').value = '';
-        notice('');
-        renderHeader();
-        renderDashboard();
-        showScreen('dashboardScreen');
-        await refreshProgress();
+        await activateAccount(data);
     } catch (error) {
         console.error('Account request failed', error);
         $('authError').textContent = `${error.message} Guest play is also available.`;
         $('authError').hidden = false;
     } finally {
+        accountBusy = false;
         buttons.forEach(id => { $(id).disabled = false; });
         $('authSubmit').textContent = authMode === 'login' ? 'Log In' : 'Create Account';
+        renderNavigation();
+    }
+}
+
+async function switchPlayer() {
+    if (accountBusy || profileSaving) return;
+    accountBusy = true;
+    renderNavigation();
+    try {
+        if (currentUser && !currentUser.isGuest) await api('/logout', { method: 'POST', body: {} });
+        stopMatch();
+        ++progressVersion;
+        currentUser = null;
+        bestScores = emptyBests();
+        $('passwordInput').value = '';
+        notice('');
+        renderHeader();
+        showScreen('authScreen');
+    } catch (error) {
+        reportError('Could not sign out. Your account remains signed in; please try again.', error);
+    } finally {
+        accountBusy = false;
+        renderNavigation();
+    }
+}
+
+function renderProfile() {
+    const progress = Players.levelProgress(currentUser.xp);
+    $('profileAccountType').textContent = currentUser.isGuest ? 'Guest / this browser' : 'Registered player';
+    $('profileHeroAvatar').textContent = currentUser.avatar;
+    $('profileUsername').textContent = currentUser.username;
+    $('profileRegion').textContent = currentUser.region;
+    $('profileLevel').textContent = `Level ${progress.level}`;
+    $('profileXp').textContent = currentUser.xp.toLocaleString();
+    $('profileRank').textContent = currentUser.isGuest ? 'Unranked' : (profileRank === null ? (profileLoading ? 'Loading...' : 'Unavailable') : `#${profileRank}`);
+    $('profileLives').textContent = `${currentUser.lives} / 5`;
+    $('profileNextLevel').textContent = `Next: Level ${progress.level + 1}`;
+    $('profileXpFraction').textContent = `${progress.earned} / ${progress.required} XP`;
+    $('profileXpProgress').max = progress.required;
+    $('profileXpProgress').value = progress.earned;
+    $('profileXpProgress').setAttribute('aria-valuetext', `${progress.earned} of ${progress.required} XP toward Level ${progress.level + 1}`);
+    $('profileXpRemaining').textContent = `${progress.remaining} XP to go. Your next level unlocks at ${progress.nextLevelXp.toLocaleString()} total XP.`;
+    $('profileBestScores').replaceChildren(...Object.entries(GAME_INFO).map(([game, info]) => {
+        const item = document.createElement('div');
+        item.className = 'profile-best';
+        const label = document.createElement('span');
+        label.textContent = info.title;
+        const score = document.createElement('strong');
+        score.textContent = bestScores[game].toLocaleString();
+        item.append(label, score);
+        return item;
+    }));
+    $('profileStorageNote').textContent = currentUser.isGuest
+        ? 'Your avatar and progress are saved only in this browser. Guest XP is not included in global rankings.'
+        : 'Your avatar is saved to your account and appears beside your name in the rankings.';
+}
+
+function renderAvatarEditor() {
+    const selected = AVATARS.find(avatar => avatar.id === draftAvatarId);
+    const changed = Boolean(selected && selected.icon !== currentUser.avatar);
+    $('profileAvatarGrid').querySelectorAll('button').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.avatarId === draftAvatarId));
+        button.disabled = profileLoading || profileSaving;
+    });
+    $('profileAvatarPreview').textContent = selected?.icon || currentUser.avatar;
+    $('profileAvatarName').textContent = selected?.name || 'Current avatar';
+    $('profileAvatarRegion').textContent = selected?.region || currentUser.region;
+    $('saveAvatar').disabled = !changed || profileLoading || profileSaving;
+    $('resetAvatar').disabled = !changed || profileLoading || profileSaving;
+    $('profileRetry').disabled = profileLoading || profileSaving;
+    $('saveAvatar').textContent = profileSaving ? 'Saving...' : 'Save avatar';
+    renderNavigation();
+}
+
+function resetAvatarEditor() {
+    draftAvatarId = AVATARS.find(avatar => avatar.icon === currentUser.avatar)?.id || null;
+    $('avatarSaveStatus').classList.remove('error');
+    $('avatarSaveStatus').textContent = 'Choose an avatar above, then save your change.';
+    renderAvatarEditor();
+}
+
+async function openProfile() {
+    showScreen('profileScreen');
+    ++progressVersion;
+    profileRank = null;
+    profileLoading = !currentUser.isGuest;
+    $('profileLoadStatus').textContent = 'Loading your latest profile...';
+    $('profileLoadStatus').classList.remove('error');
+    $('profileLoadStatus').hidden = currentUser.isGuest;
+    $('profileRetry').hidden = true;
+    renderProfile();
+    resetAvatarEditor();
+    if (currentUser.isGuest) return;
+    const user = currentUser;
+    const controller = new AbortController();
+    pageRequest = controller;
+    try {
+        const data = await api('/profile', { signal: controller.signal });
+        if (pageRequest !== controller || currentUser !== user) return;
+        if (data.user?.id !== user.id || !Number.isInteger(data.rank) || data.rank < 1 || !Array.isArray(data.bestScores)) {
+            throw new Error('The server returned an invalid profile.');
+        }
+        Players.levelProgress(data.user.xp);
+        Object.assign(user, data.user);
+        profileRank = data.rank;
+        bestScores = emptyBests();
+        for (const best of data.bestScores) {
+            if (Object.hasOwn(bestScores, best.game_name)) bestScores[best.game_name] = best.score;
+        }
+        $('profileLoadStatus').hidden = true;
+        renderHeader();
+    } catch (error) {
+        if (controller.signal.aborted || currentUser !== user) return;
+        console.error('Could not load player profile', error);
+        $('profileLoadStatus').textContent = `${error.message} Showing the last known XP and avatar.`;
+        $('profileLoadStatus').classList.add('error');
+        $('profileLoadStatus').hidden = false;
+        $('profileRetry').hidden = false;
+    } finally {
+        if (pageRequest === controller && currentUser === user) {
+            profileLoading = false;
+            pageRequest = null;
+            renderProfile();
+            resetAvatarEditor();
+        }
+    }
+}
+
+async function saveProfileAvatar(event) {
+    event.preventDefault();
+    const avatar = AVATARS.find(item => item.id === draftAvatarId);
+    if (!avatar || profileSaving || profileLoading || avatar.icon === currentUser.avatar) return;
+    const user = currentUser;
+    profileSaving = true;
+    $('avatarSaveStatus').classList.remove('error');
+    $('avatarSaveStatus').textContent = 'Saving your avatar...';
+    renderAvatarEditor();
+    try {
+        if (user.isGuest) saveGuest({ ...user, avatar: avatar.icon, region: avatar.region });
+        else {
+            const data = await api('/profile/avatar', { method: 'PATCH', body: { avatar_id: avatar.id } });
+            if (data.user?.id !== user.id || data.user.avatar !== avatar.icon || data.user.region !== avatar.region) {
+                throw new Error('The server did not confirm the selected avatar.');
+            }
+        }
+        if (currentUser !== user) return;
+        user.avatar = avatar.icon;
+        user.region = avatar.region;
+        avatarChanged = false;
+        $('avatarSaveStatus').textContent = user.isGuest ? 'Avatar saved in this browser.' : 'Avatar saved to your profile and rankings.';
+        renderHeader();
+        renderProfile();
+    } catch (error) {
+        console.error('Could not save avatar', error);
+        if (currentUser === user) {
+            $('avatarSaveStatus').classList.add('error');
+            $('avatarSaveStatus').textContent = `The avatar change could not be confirmed. ${error.message} Refresh your profile before trying again.`;
+        }
+    } finally {
+        profileSaving = false;
+        if (currentUser === user) renderAvatarEditor();
+    }
+}
+
+function renderRankingPersonal(player = null, loading = false) {
+    $('rankingOwnAvatar').textContent = currentUser.avatar;
+    $('rankingOwnTitle').textContent = currentUser.isGuest ? 'Playing as a guest' : currentUser.username;
+    $('rankingOwnRank').textContent = player ? `#${player.rank}` : '';
+    $('rankingOwnDetail').textContent = currentUser.isGuest
+        ? `Level ${Players.levelProgress(currentUser.xp).level} / ${currentUser.xp.toLocaleString()} XP on this device. Create an account to join global rankings.`
+        : (player ? `Level ${player.level} / ${player.xp.toLocaleString()} XP. Keep playing to climb!`
+            : (loading ? 'Finding your current rank...' : 'Your rank is unavailable. Refresh to try again.'));
+    if (player) $('rankingOwnAvatar').textContent = player.avatar;
+}
+
+function renderRankingList(players) {
+    $('rankingList').replaceChildren(...players.map(player => {
+        const row = document.createElement('li');
+        row.className = 'ranking-row';
+        row.value = player.rank;
+        const mine = !currentUser.isGuest && player.id === currentUser.id;
+        row.classList.toggle('is-current', mine);
+        const rank = document.createElement('span');
+        rank.className = 'rank-badge';
+        rank.textContent = `#${player.rank}`;
+        const identity = document.createElement('div');
+        identity.className = 'ranking-player';
+        const avatar = document.createElement('span');
+        avatar.className = 'ranking-avatar';
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.textContent = player.avatar;
+        const details = document.createElement('div');
+        const name = document.createElement('strong');
+        name.textContent = `${player.username}${mine ? ' (you)' : ''}`;
+        const region = document.createElement('span');
+        region.className = 'small';
+        region.textContent = player.region;
+        details.append(name, region);
+        identity.append(avatar, details);
+        const xp = document.createElement('div');
+        xp.className = 'ranking-xp';
+        xp.append(document.createTextNode(`${player.xp.toLocaleString()} XP`));
+        const level = document.createElement('span');
+        level.textContent = `Level ${player.level}`;
+        xp.append(level);
+        row.append(rank, identity, xp);
+        return row;
+    }));
+}
+
+function openRankings() {
+    showScreen('rankingsScreen');
+    rankingOffset = 0;
+    rankingTotal = 0;
+    loadRankings(0);
+}
+
+async function loadRankings(offset = rankingOffset) {
+    pageRequest?.abort();
+    const user = currentUser;
+    const controller = new AbortController();
+    pageRequest = controller;
+    rankingOffset = offset;
+    $('rankingStatus').textContent = 'Loading the latest XP rankings...';
+    $('rankingStatus').classList.remove('error');
+    $('rankingResults').hidden = true;
+    $('rankingResults').setAttribute('aria-busy', 'true');
+    $('rankingEmpty').hidden = true;
+    $('rankingPagination').hidden = true;
+    $('retryRankings').hidden = true;
+    $('refreshRankings').disabled = true;
+    renderRankingPersonal(null, true);
+    try {
+        const data = await api(`/rankings?limit=${RANKING_PAGE_SIZE}&offset=${offset}`, { signal: controller.signal });
+        if (pageRequest !== controller || currentUser !== user) return;
+        if (!Array.isArray(data.players) || !Number.isSafeInteger(data.total) || data.total < 0 ||
+            data.offset !== offset || data.limit !== RANKING_PAGE_SIZE ||
+            data.players.some(player => !Number.isSafeInteger(player.rank) || player.rank < 1 ||
+                Players.levelProgress(player.xp).level !== player.level)) {
+            throw new Error('The server returned invalid ranking data.');
+        }
+        rankingTotal = data.total;
+        renderRankingList(data.players);
+        const own = !user.isGuest && data.currentPlayer?.id === user.id ? data.currentPlayer : null;
+        renderRankingPersonal(own);
+        if (own) {
+            user.xp = own.xp;
+            user.avatar = own.avatar;
+            user.region = own.region;
+            ++progressVersion;
+            renderHeader();
+        }
+        $('rankingResults').hidden = data.players.length === 0;
+        $('rankingEmpty').hidden = data.total !== 0;
+        $('rankingStatus').textContent = data.total === 0 ? 'No registered players yet.'
+            : `Showing ${data.players.length ? offset + 1 : 0}-${offset + data.players.length} of ${data.total} players. Ties share a rank (for example, 1, 1, 3).`;
+        $('rankingPagination').hidden = data.total <= RANKING_PAGE_SIZE;
+        $('rankingPageInfo').textContent = `Page ${Math.floor(offset / RANKING_PAGE_SIZE) + 1} of ${Math.ceil(data.total / RANKING_PAGE_SIZE)}`;
+        $('previousRankingPage').disabled = offset === 0;
+        $('nextRankingPage').disabled = offset + RANKING_PAGE_SIZE >= data.total;
+    } catch (error) {
+        if (controller.signal.aborted || currentUser !== user) return;
+        console.error('Could not load rankings', error);
+        $('rankingStatus').classList.add('error');
+        $('rankingStatus').textContent = `Rankings could not be loaded. ${error.message}`;
+        $('retryRankings').hidden = false;
+        renderRankingPersonal();
+    } finally {
+        if (pageRequest === controller) {
+            pageRequest = null;
+            $('rankingResults').setAttribute('aria-busy', 'false');
+            $('refreshRankings').disabled = false;
+        }
     }
 }
 
@@ -769,6 +1097,7 @@ function finishMatch(round) {
     }));
     const heartDelta = Math.max(0, Math.min(5, currentUser.lives + earned.lives)) - currentUser.lives;
     $('resultRewards').textContent = `Player 1: +${earned.xp} XP${heartDelta ? ` / ${heartDelta > 0 ? '+' : ''}${heartDelta} heart` : ''}`;
+    $('resultLevelUp').hidden = true;
     $('saveStatus').classList.remove('error');
     $('saveStatus').textContent = 'Saving your progress...';
     $('resultMenu').disabled = true;
@@ -781,6 +1110,7 @@ function finishMatch(round) {
 
 async function saveResult(round, earned) {
     const user = currentUser;
+    const previousLevel = Players.levelProgress(user.xp).level;
     ++progressVersion;
     try {
         if (user.isGuest) {
@@ -803,7 +1133,15 @@ async function saveResult(round, earned) {
             user.lives = data.updatedUser.lives;
             bestScores[round.game] = Math.max(bestScores[round.game], round.result.scores[0]);
         }
-        if (match === round) $('saveStatus').textContent = user.isGuest ? 'Saved in this browser. Player 2 remains a local guest.' : 'Saved to your player profile.';
+        if (match === round) {
+            $('saveStatus').textContent = (user.isGuest ? 'Saved in this browser.' : 'Saved to your player profile.') +
+                (round.mode === 'local' ? ' Player 2 remains a local guest.' : '');
+            const newLevel = Players.levelProgress(user.xp).level;
+            if (newLevel > previousLevel) {
+                $('resultLevelUp').textContent = `Level up! You are now Level ${newLevel}.`;
+                $('resultLevelUp').hidden = false;
+            }
+        }
     } catch (error) {
         console.error('Score save failed', error);
         if (match === round) {
@@ -889,6 +1227,38 @@ function initialize() {
         });
         return button;
     }));
+    $('profileAvatarGrid').replaceChildren(...AVATARS.map(avatar => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'profile-avatar-choice';
+        button.dataset.avatarId = avatar.id;
+        button.setAttribute('aria-label', `${avatar.name} - ${avatar.region}`);
+        button.setAttribute('aria-pressed', 'false');
+        const icon = document.createElement('span');
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = avatar.icon;
+        const label = document.createElement('span');
+        label.textContent = avatar.region.split(' (')[0];
+        button.append(icon, label);
+        button.addEventListener('click', () => {
+            draftAvatarId = avatar.id;
+            $('avatarSaveStatus').classList.remove('error');
+            $('avatarSaveStatus').textContent = avatar.icon === currentUser.avatar ? 'This is your current avatar.' : 'Preview only. Save to apply this avatar.';
+            renderAvatarEditor();
+        });
+        return button;
+    }));
+    document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => navigateTo(button.dataset.view)));
+    $('playerAvatar').addEventListener('click', () => navigateTo('profileScreen'));
+    $('profileAvatarForm').addEventListener('submit', saveProfileAvatar);
+    $('resetAvatar').addEventListener('click', resetAvatarEditor);
+    $('profileRetry').addEventListener('click', openProfile);
+    $('refreshRankings').addEventListener('click', () => loadRankings(0));
+    $('retryRankings').addEventListener('click', () => loadRankings());
+    $('previousRankingPage').addEventListener('click', () => loadRankings(Math.max(0, rankingOffset - RANKING_PAGE_SIZE)));
+    $('nextRankingPage').addEventListener('click', () => {
+        if (rankingOffset + RANKING_PAGE_SIZE < rankingTotal) loadRankings(rankingOffset + RANKING_PAGE_SIZE);
+    });
     $('authForm').addEventListener('submit', authenticate);
     $('guestPlay').addEventListener('click', startGuest);
     $('authModeToggle').addEventListener('click', () => {
@@ -902,16 +1272,7 @@ function initialize() {
         $('avatarDetails').open = authMode === 'register';
         $('authError').hidden = true;
     });
-    $('logoutButton').addEventListener('click', () => {
-        stopMatch();
-        ++progressVersion;
-        currentUser = null;
-        bestScores = emptyBests();
-        $('passwordInput').value = '';
-        notice('');
-        renderHeader();
-        showScreen('authScreen');
-    });
+    $('logoutButton').addEventListener('click', switchPlayer);
     document.querySelectorAll('[data-game]').forEach(button => button.addEventListener('click', () => openSetup(button.dataset.game)));
     document.querySelectorAll('input[name="playMode"]').forEach(input => input.addEventListener('change', renderSetup));
     $('setupForm').addEventListener('submit', event => {
@@ -1004,6 +1365,7 @@ function initialize() {
         else if (match?.game === 'songo') scheduleSongoAI(match);
     });
     renderHeader();
+    restoreSession();
 }
 
 initialize();

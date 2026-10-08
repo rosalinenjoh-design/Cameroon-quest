@@ -8,6 +8,7 @@
     <title>Cameroon Quest - Play, Discover, Learn</title>
     <link rel="stylesheet" href="style.css">
     <script src="game-engine.js" defer></script>
+    <script src="player-profile.js" defer></script>
     <script src="app.js" defer></script>
 </head>
 <body>
@@ -15,7 +16,7 @@
     <div class="app-shell">
         <header class="player-header">
             <div class="player-identity">
-                <span id="playerAvatar" class="player-avatar" aria-hidden="true">&#129409;</span>
+                <button id="playerAvatar" class="player-avatar" type="button" aria-label="Open your profile" disabled>&#129409;</button>
                 <div class="player-info">
                     <strong id="userDisplayName">Guest Player</strong>
                     <span id="playerLevel" class="level-badge">Level 1</span>
@@ -29,6 +30,12 @@
         </header>
 
         <div id="appNotice" class="notice" role="status" hidden></div>
+
+        <nav id="appNavigation" class="app-navigation" aria-label="Player pages" hidden>
+            <button type="button" data-view="dashboardScreen"><span aria-hidden="true">&#127918;</span> Games</button>
+            <button type="button" data-view="profileScreen"><span aria-hidden="true">&#128100;</span> Profile</button>
+            <button type="button" data-view="rankingsScreen"><span aria-hidden="true">&#127942;</span> Rankings</button>
+        </nav>
 
         <main id="mainContent" tabindex="-1">
             <section id="authScreen" class="screen">
@@ -103,6 +110,74 @@
                     </article>
                 </div>
                 <p id="progressNote" class="small muted centered footer-note"></p>
+            </section>
+
+            <section id="profileScreen" class="screen" hidden>
+                <div class="section-heading">
+                    <div><p class="eyebrow">Your cultural journey</p><h1>My profile</h1></div>
+                    <span id="profileAccountType" class="tag"></span>
+                </div>
+                <p id="profileLoadStatus" class="page-status" role="status" hidden></p>
+                <button id="profileRetry" class="button button-small button-secondary" type="button" hidden>Retry loading profile</button>
+                <div class="panel profile-overview">
+                    <div class="profile-identity">
+                        <span id="profileHeroAvatar" class="profile-hero-avatar" aria-hidden="true"></span>
+                        <div><h2 id="profileUsername"></h2><p id="profileRegion" class="muted"></p><span id="profileLevel" class="level-badge"></span></div>
+                    </div>
+                    <div class="profile-stat-grid">
+                        <div><span>Total XP</span><strong id="profileXp">0</strong></div>
+                        <div><span>Global rank</span><strong id="profileRank">Not ranked</strong></div>
+                        <div><span>Hearts</span><strong id="profileLives">5 / 5</strong></div>
+                    </div>
+                    <div class="level-progress">
+                        <div><label id="profileNextLevel" for="profileXpProgress">Next level</label><strong id="profileXpFraction"></strong></div>
+                        <progress id="profileXpProgress" max="250" value="0" aria-label="XP earned toward your next level"></progress>
+                        <p id="profileXpRemaining" class="small"></p>
+                        <p class="small muted">A new level every 250 XP: Level 2 at 250, Level 3 at 500, and so on.</p>
+                    </div>
+                </div>
+                <section class="panel profile-bests" aria-labelledby="profileBestsHeading">
+                    <h2 id="profileBestsHeading">Your personal bests</h2>
+                    <div id="profileBestScores" class="profile-best-grid"></div>
+                </section>
+                <form id="profileAvatarForm" class="panel profile-avatar-form">
+                    <div class="section-heading"><div><p class="eyebrow">Represent your region</p><h2>Choose your avatar</h2></div><span class="tag">10 regions</span></div>
+                    <p class="muted small">Your avatar and region change together. Your XP, level, and scores stay with you.</p>
+                    <div id="profileAvatarGrid" class="profile-avatar-grid" role="group" aria-label="Choose a new regional avatar"></div>
+                    <div class="avatar-preview"><span id="profileAvatarPreview" aria-hidden="true"></span><div><strong id="profileAvatarName"></strong><p id="profileAvatarRegion" class="small muted"></p></div></div>
+                    <p id="avatarSaveStatus" class="page-status" role="status"></p>
+                    <div class="profile-actions"><button id="resetAvatar" class="button button-secondary" type="button" disabled>Cancel changes</button><button id="saveAvatar" class="button button-gold" type="submit" disabled>Save avatar</button></div>
+                </form>
+                <p id="profileStorageNote" class="small muted centered footer-note"></p>
+            </section>
+
+            <section id="rankingsScreen" class="screen" hidden>
+                <div class="section-heading">
+                    <div><p class="eyebrow">Celebrate every quest</p><h1>Player rankings</h1></div>
+                    <button id="refreshRankings" class="button button-small button-secondary" type="button">Refresh</button>
+                </div>
+                <div class="welcome-panel ranking-intro">
+                    <h2>Keep playing. Keep climbing.</h2>
+                    <p>Registered players are ordered by total XP. Equal XP shares a rank; levels increase every 250 XP.</p>
+                </div>
+                <div id="rankingPersonal" class="panel ranking-personal">
+                    <span id="rankingOwnAvatar" class="ranking-avatar" aria-hidden="true"></span>
+                    <div><strong id="rankingOwnTitle"></strong><p id="rankingOwnDetail" class="small muted"></p></div>
+                    <span id="rankingOwnRank" class="rank-badge"></span>
+                </div>
+                <p id="rankingStatus" class="page-status" role="status"></p>
+                <button id="retryRankings" class="button button-secondary" type="button" hidden>Try again</button>
+                <div id="rankingEmpty" class="panel empty-state" hidden><span aria-hidden="true">&#127942;</span><h2>The journey is just beginning</h2><p>No registered players yet. Create an account and complete a quest to get started.</p></div>
+                <div id="rankingResults" class="ranking-results" aria-busy="false" hidden>
+                    <div class="ranking-columns" aria-hidden="true"><span>Rank</span><span>Player</span><span>Total XP</span></div>
+                    <ol id="rankingList" class="ranking-list" aria-label="Players ordered by total XP"></ol>
+                </div>
+                <div id="rankingPagination" class="ranking-pagination" hidden>
+                    <button id="previousRankingPage" class="button button-small button-secondary" type="button">Previous</button>
+                    <span id="rankingPageInfo" class="small muted"></span>
+                    <button id="nextRankingPage" class="button button-small button-secondary" type="button">Next</button>
+                </div>
+                <p class="small muted centered footer-note">Guest and local Player 2 progress stays on the device and is not submitted to global rankings.</p>
             </section>
 
             <section id="gameScreen" class="screen" hidden>
@@ -223,6 +298,7 @@
         <h2 id="resultTitle"></h2><p id="resultDescription" class="muted"></p>
         <div id="resultScores" class="score-panels"></div>
         <p id="resultRewards" class="reward-line"></p>
+        <p id="resultLevelUp" class="level-up-notice" role="status" hidden></p>
         <p id="saveStatus" class="small" role="status"></p>
         <div class="dialog-actions"><button id="resultMenu" class="button button-secondary" type="button">Back to menu</button><button id="playAgain" class="button button-gold" type="button">Play again</button></div>
     </dialog>
