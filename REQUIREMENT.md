@@ -1,19 +1,41 @@
-# CameroonQuest - System Requirements Specification
+# Cameroon Quest - Implemented scope
 
-# System Requirements & Specifications
+## Technology
 
-## Tech Stack
-- **Frontend:** HTML5 Canvas, CSS3 Grid/Flexbox, Vanilla JavaScript (ES6+).
-- **Backend:** Node.js, Express REST API.
-- **Database:** SQLite3 with relational tables for users, game scores, and quiz questions.
-- **Security:** Password hashing via `bcryptjs`, CORS middleware protection.
+- Responsive HTML/CSS and vanilla JavaScript.
+- Accessible DOM buttons for the Songo board and quiz; canvas for real-time games.
+- Node.js 22+, Express, bcrypt password hashing, and SQLite.
+- Shared pure game rules with Node's built-in regression test runner.
 
-## Core Features
-1. **Authentication System:** Secure registration and login supporting 10 regional animal avatars representing Cameroon's regions.
-2. **Dashboard & Score Tracking:** Visual progress score bars for each mini-game linked directly to the database.
-3. **Three Cultural Mini-Games:**
-   - **Songo:** Mancala seed board game with AI and 2-player support.
-   - **Pirogue Racing:** Extended long-track Wouri river race with vivid blue water and landscapes.
-   - **Dochi:** Grassfields 3-person dodgeball with omnidirectional movement.
-4. **Trivia Quiz:** Cultural questionnaire to replenish player lives (+1 Heart) and earn XP.
-5. **Mobile & Responsive UI:** Designed with touch-ready viewports and green-yellow-red Cameroonian color tokens.
+## UI
+
+- Dark screenshot-inspired shell with Cameroon green/red/yellow accents.
+- Regional avatar, XP, level, and hearts; no nonfunctional currency or email field.
+- Existing account login/registration plus browser-persisted guest play.
+- Game setup, mode selection, local Player 2 name, rules, pause/resume, exit/restart confirmation, and results with explicit save status.
+- Mobile layouts, multi-touch buttons, keyboard focus, labeled inputs, reduced motion, and no required external font/CDN services.
+
+## Games
+
+1. **Songo:** five pits per side, five seeds per pit; documented arcade capture/feeding/end rules. Solo AI or local two-player turns. Three AI difficulties.
+2. **Pirogue:** equal-speed automatic paddling, matched obstacle courses, steering, one slowdown per collision, and first-finisher/draw detection. Solo AI or simultaneous two-player racing on one device.
+3. **Dochi:** strictly single-player; two aimed throwers, bounded/normalized movement, swept collision detection, difficulty-based survival timers, and one terminal result.
+4. **Quiz:** five questions; solo or local pass-and-play. Both players answer before feedback, starting players alternate, and rewards depend on correct answers.
+
+## Progress and lifecycle
+
+- Only Player 1 saves progress. Player 2 is a local guest.
+- Completed rounds save once per client round; unfinished rounds do not save or lose hearts.
+- Local multiplayer losses do not cost hearts. Hearts are a progress indicator, not a play restriction.
+- Screen exit, restart, and player switching dispose of game timers and inputs.
+- Real-time games pause on focus/visibility loss and resume explicitly.
+- Quiz loading/answer requests are cancelled when their round is abandoned.
+- Startup seeds missing quiz questions without adding duplicates; quiz requests also suppress legacy duplicate questions.
+- Score insertion and XP/hearts updates are atomic and errors are surfaced.
+
+## Non-goals and release requirements
+
+- Multiplayer is not online and does not connect separate devices.
+- The five-pit Songo adaptation does not claim traditional/tournament accuracy.
+- The retained ID-based account API needs authenticated sessions and ownership checks before public deployment. Client-reported game outcomes are not cheat-resistant.
+- See [README.md](README.md) for setup, controls, rules, tests, and follow-up UI recommendations.

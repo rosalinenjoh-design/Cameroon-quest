@@ -1,4 +1,4 @@
--- CameroonQuest Database Schema (SQLite / PostgreSQL compatible)
+-- CameroonQuest SQLite schema. Existing profiles and scores are preserved.
 
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,10 +33,4 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
     correct_answer TEXT NOT NULL -- 'A', 'B', 'C', 'D'
 );
 
--- Seed Initial Quiz Data
-INSERT OR IGNORE INTO quiz_questions (id, region, question, option_a, option_b, option_c, option_d, correct_answer) VALUES
-(1, 'Center', 'Which traditional board game originated mainly from the Beti culture in Cameroon?', 'Ludo', 'Songo', 'Checkers', 'Scrabble', 'B'),
-(2, 'Littoral', 'The famous annual Duala canoe race on the Wouri river is known as:', 'Ngondo Festival', 'Nguon Festival', 'Foumban Carnival', 'Mount Cameroon Race', 'A'),
-(3, 'West', 'Dochi is a traditional agility game deeply rooted in which cultural region of Cameroon?', 'Far North', 'East', 'Grassfields (West)', 'South', 'C'),
-(4, 'Adamawa', 'What is the traditional capital and historic emirate located in the Adamawa region?', 'Maroua', 'Ngaoundéré', 'Garoua', 'Bamenda', 'B'),
-(5, 'South-West', 'Mount Cameroon, the highest peak in West/Central Africa, is located in which region?', 'South-West', 'North-West', 'Littoral', 'Center', 'A');
+-- server.js seeds the shared question bank from game-engine.js without duplicating questions.

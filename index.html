@@ -3,165 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CameroonQuest... A clue of 237</title>
+    <meta name="theme-color" content="#10151b">
+    <meta name="description" content="Discover Cameroon through Songo, Pirogue racing, Dochi, and cultural quizzes. Play solo or together on one phone or PC.">
+    <title>Cameroon Quest - Play, Discover, Learn</title>
     <link rel="stylesheet" href="style.css">
+    <script src="game-engine.js" defer></script>
+    <script src="app.js" defer></script>
 </head>
 <body>
-    <header>
-        <div class="logo-area">
-            <h1>CameroonQuest</h1>
-            <p>A clue of 237 • Cultural Arcade</p>
-        </div>
-        <div id="userBadgeArea" class="user-badge">
-            <span id="userDisplayName">Guest</span> | 
-            ❤️ <span id="userLives">5</span> | 
-            ⭐ XP: <span id="userXp">0</span>
-        </div>
-    </header>
-
-    <main>
-        <!-- AUTH SCREEN -->
-        <section id="authScreen" class="screen active">
-            <div class="card auth-container">
-                <h2>Player Authentication</h2>
-                <p>Choose your regional animal avatar & enter credentials:</p>
-                
-                <div class="avatar-grid" id="avatarGrid"></div>
-
-                <label>Username:</label>
-                <input type="text" id="usernameInput" placeholder="Enter username...">
-
-                <label>Password:</label>
-                <input type="password" id="passwordInput" placeholder="Enter password...">
-
-                <div style="display: flex; gap: 10px; margin-top: 1rem;">
-                    <button class="btn" onclick="handleLogin()" style="flex: 1;">Login</button>
-                    <button class="btn btn-yellow" onclick="handleRegister()" style="flex: 1;">Register</button>
+    <a class="skip-link" href="#mainContent">Skip to content</a>
+    <div class="app-shell">
+        <header class="player-header">
+            <div class="player-identity">
+                <span id="playerAvatar" class="player-avatar" aria-hidden="true">&#129409;</span>
+                <div class="player-info">
+                    <strong id="userDisplayName">Guest Player</strong>
+                    <span id="playerLevel" class="level-badge">Level 1</span>
                 </div>
             </div>
-        </section>
-
-        <!-- DASHBOARD SCREEN -->
-        <section id="dashboardScreen" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Player Dashboard & Progress</h2>
-                <button class="btn btn-red" onclick="logout()">Logout</button>
+            <div class="header-stats">
+                <span class="stat-pill" title="Experience points"><span aria-hidden="true">&#11088;</span> <span id="userXp">0</span> XP</span>
+                <span class="stat-pill" title="Hearts: quiz success can restore them"><span class="heart" aria-hidden="true">&#9829;</span> <span id="userLives">5</span><span class="sr-only"> lives</span></span>
+                <button id="soundToggle" class="icon-button" type="button" aria-label="Turn sound on" aria-pressed="false"><span aria-hidden="true">&#128263;</span></button>
             </div>
+        </header>
 
-            <div class="dashboard-grid">
-                <!-- Songo Card -->
-                <div class="card game-card">
-                    <div>
-                        <h3>Songo (Center)</h3>
-                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Mancala seed board game with AI and small ball visuals.</p>
+        <div id="appNotice" class="notice" role="status" hidden></div>
+
+        <main id="mainContent" tabindex="-1">
+            <section id="authScreen" class="screen">
+                <div class="brand">
+                    <div class="flag-strip" aria-label="Cameroon flag"><span></span><span>&#9733;</span><span></span></div>
+                    <p class="eyebrow">A clue of 237</p>
+                    <h1>CAMEROON QUEST</h1>
+                    <p>Preserving Cameroonian heritage through interactive play.</p>
+                </div>
+                <form id="authForm" class="panel auth-form">
+                    <div class="section-heading">
+                        <h2 id="authTitle">Welcome, explorer</h2>
+                        <span class="tag">Play your way</span>
                     </div>
-                    <div>
-                        <div class="score-bar-container"><div id="songoScoreFill" class="score-bar-fill"></div></div>
-                        <p id="songoScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
-                        <button class="btn" onclick="launchGame('songo')" style="width: 100%;">Play Songo</button>
+                    <label for="usernameInput">Player name</label>
+                    <input id="usernameInput" name="username" autocomplete="username" maxlength="40" placeholder="e.g. MboaWarrior" required>
+                    <label for="passwordInput">Password</label>
+                    <input id="passwordInput" name="password" type="password" autocomplete="current-password" maxlength="128" placeholder="Your password" required>
+                    <details id="avatarDetails">
+                        <summary>Choose your regional avatar</summary>
+                        <div id="avatarGrid" class="avatar-grid" role="group" aria-label="Regional avatars"></div>
+                        <p id="selectedRegion" class="small muted">Centre (Yaounde)</p>
+                    </details>
+                    <p id="authError" class="form-error" role="alert" hidden></p>
+                    <button id="authSubmit" class="button button-green" type="submit">Log In</button>
+                    <button id="authModeToggle" class="button button-secondary" type="button">Create Account</button>
+                    <div class="form-divider"><span>or jump straight in</span></div>
+                    <button id="guestPlay" class="button button-gold" type="button">Quick Guest Play <span aria-hidden="true">&#8594;</span></button>
+                    <p class="small muted centered">No email needed. Guest progress is saved in this browser.<br>Two players can share one phone, tablet, or PC.</p>
+                </form>
+            </section>
+
+            <section id="dashboardScreen" class="screen" hidden>
+                <div class="section-heading">
+                    <div><p class="eyebrow">Play. Discover. Learn.</p><h1>Your next adventure</h1></div>
+                    <button id="logoutButton" class="button button-small button-secondary" type="button">Switch player</button>
+                </div>
+                <div class="welcome-panel">
+                    <div class="flag-strip" aria-hidden="true"><span></span><span>&#9733;</span><span></span></div>
+                    <h2>One Cameroon. Plenty to explore.</h2>
+                    <p>Challenge a friend, master a traditional board, or test your cultural knowledge.</p>
+                    <div class="welcome-tags"><span class="tag">10 regional avatars</span><span class="tag">Same-device multiplayer</span></div>
+                </div>
+                <div class="dashboard-grid">
+                    <article class="game-card songo-card">
+                        <div class="card-top"><span class="game-icon" aria-hidden="true">&#127792;</span><span class="tag">1 or 2 players</span></div>
+                        <p class="eyebrow">Centre / Beti inspiration</p><h2>Songo Board</h2>
+                        <p>Sow, capture, and think a move ahead. A five-pit arcade adaptation.</p>
+                        <div class="card-progress"><span id="songoScoreText">Best: 0</span><div class="score-track"><span id="songoScoreFill"></span></div></div>
+                        <button class="button button-green" data-game="songo" type="button">Play Songo <span aria-hidden="true">&#8594;</span></button>
+                    </article>
+                    <article class="game-card pirogue-card">
+                        <div class="card-top"><span class="game-icon" aria-hidden="true">&#128758;</span><span class="tag">1 or 2 players</span></div>
+                        <p class="eyebrow">Littoral / Wouri River</p><h2>Pirogue Regatta</h2>
+                        <p>Navigate the river, dodge floating logs, and cross the finish line first.</p>
+                        <div class="card-progress"><span id="pirogueScoreText">Best: 0</span><div class="score-track"><span id="pirogueScoreFill"></span></div></div>
+                        <button class="button button-green" data-game="pirogue" type="button">Race the River <span aria-hidden="true">&#8594;</span></button>
+                    </article>
+                    <article class="game-card dochi-card">
+                        <div class="card-top"><span class="game-icon" aria-hidden="true">&#127919;</span><span class="tag">1 player only</span></div>
+                        <p class="eyebrow">Grassfields-inspired agility</p><h2>Dochi Dodgeball</h2>
+                        <p>Two throwers. One survivor. Keep moving and outlast the clock.</p>
+                        <div class="card-progress"><span id="dochiScoreText">Best: 0</span><div class="score-track"><span id="dochiScoreFill"></span></div></div>
+                        <button class="button button-green" data-game="dochi" type="button">Play Dochi <span aria-hidden="true">&#8594;</span></button>
+                    </article>
+                    <article class="game-card quiz-card">
+                        <div class="card-top"><span class="game-icon" aria-hidden="true">&#127757;</span><span class="tag">1 or 2 players</span></div>
+                        <p class="eyebrow">A journey across Cameroon</p><h2>Cultural Quiz</h2>
+                        <p>Discover local knowledge. Take turns with a friend and earn back a heart.</p>
+                        <div class="card-progress"><span id="quizScoreText">Best: 0</span><div class="score-track"><span id="quizScoreFill"></span></div></div>
+                        <button class="button button-gold" data-game="quiz" type="button">Take the Quiz <span aria-hidden="true">&#8594;</span></button>
+                    </article>
+                </div>
+                <p id="progressNote" class="small muted centered footer-note"></p>
+            </section>
+
+            <section id="gameScreen" class="screen" hidden>
+                <div class="section-heading game-heading">
+                    <div><p id="gameRegion" class="eyebrow"></p><h1 id="gameTitleHeading">Game arena</h1></div>
+                    <button id="exitGame" class="button button-small button-secondary" type="button"><span aria-hidden="true">&#8592;</span> Menu</button>
+                </div>
+                <div class="game-toolbar">
+                    <div class="game-tags"><span id="modeBadge" class="tag"></span><span id="difficultyBadge" class="tag"></span></div>
+                    <div class="toolbar-actions">
+                        <button id="helpButton" class="text-button" type="button">Rules</button>
+                        <button id="pauseGame" class="text-button" type="button" hidden>Pause</button>
+                        <button id="restartGame" class="text-button" type="button">Restart</button>
                     </div>
                 </div>
+                <p id="gameStatus" class="turn-status" role="status"></p>
 
-                <!-- Pirogue Card -->
-                <div class="card game-card">
-                    <div>
-                        <h3>Pirogue Racing (Littoral)</h3>
-                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Wouri river canoe race across long landscapes.</p>
+                <div id="songoArena" hidden>
+                    <div class="songo-board">
+                        <p id="topSideLabel" class="board-label"></p>
+                        <div id="topPits" class="pit-row"></div>
+                        <div class="board-divider" aria-hidden="true"></div>
+                        <div id="bottomPits" class="pit-row"></div>
+                        <p id="bottomSideLabel" class="board-label"></p>
                     </div>
-                    <div>
-                        <div class="score-bar-container"><div id="pirogueScoreFill" class="score-bar-fill"></div></div>
-                        <p id="pirogueScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
-                        <button class="btn" onclick="launchGame('pirogue')" style="width: 100%;">Play Pirogue</button>
+                    <div class="score-panels">
+                        <div class="score-panel player-one"><span id="songoPlayerOne"></span><strong id="songoScoreOne">0 seeds</strong></div>
+                        <div class="score-panel player-two"><span id="songoPlayerTwo"></span><strong id="songoScoreTwo">0 seeds</strong></div>
                     </div>
+                    <p class="small muted centered">Tap a highlighted pit. Capture 2 or 3 seeds on the other side.<br>Five-pit arcade rules; open Rules for the complete version.</p>
                 </div>
 
-                <!-- Dochi Card -->
-                <div class="card game-card">
-                    <div>
-                        <h3>Dochi (West Grassfields)</h3>
-                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Two-thrower dodgeball with omnidirectional movement.</p>
+                <div id="canvasArena" hidden>
+                    <div class="arena-meters">
+                        <div class="arena-meter"><div><span id="meterOneLabel"></span><strong id="meterOneValue"></strong></div><progress id="meterOne" max="100" value="0" aria-label="Player one progress"></progress></div>
+                        <div id="meterTwoWrap" class="arena-meter"><div><span id="meterTwoLabel"></span><strong id="meterTwoValue"></strong></div><progress id="meterTwo" max="100" value="0" aria-label="Player two progress"></progress></div>
                     </div>
-                    <div>
-                        <div class="score-bar-container"><div id="dochiScoreFill" class="score-bar-fill"></div></div>
-                        <p id="dochiScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
-                        <button class="btn" onclick="launchGame('dochi')" style="width: 100%;">Play Dochi</button>
+                    <div class="canvas-stage">
+                        <canvas id="gameCanvas" width="640" height="460" tabindex="0" aria-label="Game arena. Use the controls below or your keyboard.">This game needs a browser with HTML canvas support.</canvas>
+                        <div id="pauseOverlay" class="arena-overlay">
+                            <p id="pauseEyebrow" class="eyebrow">Ready when you are</p>
+                            <h2 id="pauseTitle">Ready to play?</h2>
+                            <p id="pauseDescription"></p>
+                            <button id="resumeGame" class="button button-gold" type="button">Start</button>
+                        </div>
                     </div>
+                    <div id="raceControls" class="touch-controls race-controls" hidden>
+                        <div class="control-group player-one">
+                            <p id="raceControlsOne">Player 1</p>
+                            <div class="control-buttons"><button class="control-button" type="button" data-control="p1-left" aria-label="Player one steer left">&#8592;</button><button class="control-button" type="button" data-control="p1-right" aria-label="Player one steer right">&#8594;</button></div>
+                            <span class="key-hint">A / D</span>
+                        </div>
+                        <div id="raceControlsTwoWrap" class="control-group player-two">
+                            <p id="raceControlsTwo">Player 2</p>
+                            <div class="control-buttons"><button class="control-button" type="button" data-control="p2-left" aria-label="Player two steer left">&#8592;</button><button class="control-button" type="button" data-control="p2-right" aria-label="Player two steer right">&#8594;</button></div>
+                            <span class="key-hint">Left / Right arrow keys</span>
+                        </div>
+                    </div>
+                    <div id="dochiControls" class="touch-controls dochi-controls" hidden>
+                        <div class="d-pad" role="group" aria-label="Move your Dochi player">
+                            <button class="control-button d-up" type="button" data-control="up" aria-label="Move up">&#8593;</button>
+                            <button class="control-button d-left" type="button" data-control="left" aria-label="Move left">&#8592;</button>
+                            <span class="d-center" aria-hidden="true">&#9679;</span>
+                            <button class="control-button d-right" type="button" data-control="right" aria-label="Move right">&#8594;</button>
+                            <button class="control-button d-down" type="button" data-control="down" aria-label="Move down">&#8595;</button>
+                        </div>
+                        <p class="small muted">Hold the arrows to move.<br>On PC: WASD or arrow keys.<br><kbd>Space</kbd> to pause.</p>
+                    </div>
+                    <p id="controlsHint" class="small muted centered"></p>
                 </div>
 
-                <!-- Quiz Card -->
-                <div class="card game-card">
-                    <div>
-                        <h3>Cultural Trivia Quiz</h3>
-                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Test your knowledge in a dedicated window to earn Lives & XP!</p>
+                <div id="quizArena" class="quiz-arena" hidden>
+                    <div class="quiz-meta"><span id="quizRegion" class="tag"></span><span id="quizProgress" class="small muted"></span></div>
+                    <div id="quizQuestionPanel" class="panel">
+                        <h2 id="quizQuestionText"></h2>
+                        <div id="quizOptions" class="quiz-options"></div>
                     </div>
-                    <div>
-                        <div class="score-bar-container"><div id="quizScoreFill" class="score-bar-fill"></div></div>
-                        <p id="quizScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
-                        <button class="btn btn-yellow" onclick="startQuiz()" style="width: 100%;">Start Quiz Arena</button>
+                    <div id="quizHandoff" class="panel handoff-panel" hidden>
+                        <span class="handoff-icon" aria-hidden="true">&#129309;</span>
+                        <h2 id="handoffTitle"></h2><p>No answer is revealed until both players have chosen.</p>
                     </div>
+                    <p id="quizFeedback" class="quiz-feedback" role="status"></p>
+                    <button id="quizContinue" class="button button-gold" type="button" hidden>Next question</button>
+                    <div class="score-panels"><div class="score-panel player-one"><span id="quizNameOne"></span><strong id="quizScoreOne">0 correct</strong></div><div id="quizScoreTwoWrap" class="score-panel player-two"><span id="quizNameTwo"></span><strong id="quizScoreTwo">0 correct</strong></div></div>
                 </div>
-            </div>
-        </section>
-
-        <!-- GAMEPLAY SCREEN -->
-        <section id="gameScreen" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2 id="gameTitleHeading">Game Arena</h2>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-yellow" onclick="openHelpModal()">Help / Guide</button>
-                    <button class="btn btn-red" onclick="enterDashboard()">Back to Dashboard</button>
-                </div>
-            </div>
-
-            <!-- Difficulty Controls -->
-            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
-                <button id="btn-easy" class="btn" onclick="setDifficulty('easy')">Easy</button>
-                <button id="btn-medium" class="btn" onclick="setDifficulty('medium')">Medium</button>
-                <button id="btn-hard" class="btn" onclick="setDifficulty('hard')">Hard</button>
-            </div>
-
-            <div class="game-viewport">
-                <canvas id="gameCanvas" width="700" height="400"></canvas>
-            </div>
-        </section>
-    </main>
-
-    <!-- HELP MODAL -->
-    <div id="helpModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>How to Play</h3>
-            <p id="helpTextContent" style="margin: 1rem 0; line-height: 1.5;"></p>
-            <button class="btn" onclick="closeHelpModal()">Got It</button>
-        </div>
+            </section>
+        </main>
+        <footer class="app-footer">Made for curious minds. Rooted in Cameroon. <span aria-hidden="true">&#127464;&#127474;</span></footer>
     </div>
 
-    <!-- CULTURAL QUIZ MODAL WINDOW -->
-    <div id="quizModal" class="modal hidden">
-        <div class="modal-content quiz-modal-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3 id="quizHeaderTitle" style="color: var(--cam-yellow);">Cameroon Cultural Quiz Arena</h3>
-                <span id="quizProgressIndicator" style="font-size: 0.9rem; color: #94A3B8;">Question 1/5</span>
-            </div>
-            
-            <div id="quizRegionTag" style="display: inline-block; background: var(--cam-green); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; font-weight: bold;">Region: Center</div>
-            
-            <p id="quizQuestionText" style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.5;"></p>
+    <dialog id="setupDialog" class="dialog" aria-labelledby="setupTitle">
+        <form id="setupForm">
+            <div class="section-heading"><div><p class="eyebrow">Make it your match</p><h2 id="setupTitle">Game setup</h2></div><button class="icon-button" type="button" data-close="setupDialog" aria-label="Close setup">&#215;</button></div>
+            <p id="setupDescription" class="muted"></p>
+            <fieldset id="modePicker"><legend>Players</legend><div class="mode-options"><label><input type="radio" name="playMode" value="solo" checked><span>Solo<span class="small">Play at your pace</span></span></label><label><input type="radio" name="playMode" value="local"><span>Two players<span class="small">One shared device</span></span></label></div></fieldset>
+            <p id="soloOnlyNote" class="notice" hidden>Dochi is a single-player survival challenge.</p>
+            <div id="secondPlayerField" hidden><label for="secondPlayerName">Player 2 name</label><input id="secondPlayerName" maxlength="24" placeholder="Player 2" autocomplete="off"><p class="small muted">Player 2 joins locally. Only player 1's profile receives saved progress.</p></div>
+            <div id="difficultyField"><label for="difficultySelect">Difficulty</label><select id="difficultySelect"><option value="easy">Easy - learn the ropes</option><option value="medium">Medium - a little challenge</option><option value="hard">Hard - test your skills</option></select><p id="difficultyHelp" class="small muted"></p></div>
+            <p id="setupControls" class="controls-summary"></p>
+            <button class="button button-gold" type="submit">Let's Play <span aria-hidden="true">&#8594;</span></button>
+        </form>
+    </dialog>
 
-            <div class="quiz-options-grid" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem;">
-                <button class="quiz-opt-btn" id="optA" onclick="submitQuizAnswer('A')">A) Option A</button>
-                <button class="quiz-opt-btn" id="optB" onclick="submitQuizAnswer('B')">B) Option B</button>
-                <button class="quiz-opt-btn" id="optC" onclick="submitQuizAnswer('C')">C) Option C</button>
-                <button class="quiz-opt-btn" id="optD" onclick="submitQuizAnswer('D')">D) Option D</button>
-            </div>
+    <dialog id="helpDialog" class="dialog" aria-labelledby="helpTitle">
+        <div class="section-heading"><h2 id="helpTitle">How to play</h2><button class="icon-button" type="button" data-close="helpDialog" aria-label="Close rules">&#215;</button></div>
+        <div id="helpContent" class="rules-copy"></div>
+        <button class="button button-green" type="button" data-close="helpDialog">Got it</button>
+    </dialog>
 
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <p id="quizFeedbackMsg" style="font-weight: bold; font-size: 0.95rem;"></p>
-                <button id="quizNextBtn" class="btn hidden" onclick="loadNextQuizQuestion()">Next Question</button>
-            </div>
-            <button class="btn btn-red" onclick="closeQuizModal()" style="margin-top: 1rem; width: 100%;">Quit Quiz</button>
-        </div>
-    </div>
+    <dialog id="confirmDialog" class="dialog" aria-labelledby="confirmTitle">
+        <h2 id="confirmTitle">Leave this round?</h2>
+        <p id="confirmDescription" class="muted">Your unfinished round will not be recorded.</p>
+        <div class="dialog-actions"><button class="button button-secondary" type="button" data-close="confirmDialog">Keep playing</button><button id="confirmAction" class="button button-gold" type="button">Leave round</button></div>
+    </dialog>
 
-    <script src="app.js"></script>
+    <dialog id="resultDialog" class="dialog result-dialog" aria-labelledby="resultTitle">
+        <p class="eyebrow">Quest complete</p><div id="resultIcon" class="result-icon" aria-hidden="true">&#127942;</div>
+        <h2 id="resultTitle"></h2><p id="resultDescription" class="muted"></p>
+        <div id="resultScores" class="score-panels"></div>
+        <p id="resultRewards" class="reward-line"></p>
+        <p id="saveStatus" class="small" role="status"></p>
+        <div class="dialog-actions"><button id="resultMenu" class="button button-secondary" type="button">Back to menu</button><button id="playAgain" class="button button-gold" type="button">Play again</button></div>
+    </dialog>
+    <noscript><p class="notice">Enable JavaScript to play Cameroon Quest.</p></noscript>
 </body>
 </html>
