@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CameroonQuest... A clue of 237</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <h1>CameroonQuest</h1>
+            <p>A clue of 237 • Cultural Arcade</p>
+        </div>
+        <div id="userBadgeArea" class="user-badge">
+            <span id="userDisplayName">Guest</span> | 
+            ❤️ <span id="userLives">5</span> | 
+            ⭐ XP: <span id="userXp">0</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- AUTH SCREEN -->
+        <section id="authScreen" class="screen active">
+            <div class="card auth-container">
+                <h2>Player Authentication</h2>
+                <p>Choose your regional animal avatar & enter credentials:</p>
+                
+                <div class="avatar-grid" id="avatarGrid"></div>
+
+                <label>Username:</label>
+                <input type="text" id="usernameInput" placeholder="Enter username...">
+
+                <label>Password:</label>
+                <input type="password" id="passwordInput" placeholder="Enter password...">
+
+                <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                    <button class="btn" onclick="handleLogin()" style="flex: 1;">Login</button>
+                    <button class="btn btn-yellow" onclick="handleRegister()" style="flex: 1;">Register</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD SCREEN -->
+        <section id="dashboardScreen" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Player Dashboard & Progress</h2>
+                <button class="btn btn-red" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Songo Card -->
+                <div class="card game-card">
+                    <div>
+                        <h3>Songo (Center)</h3>
+                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Mancala seed board game with AI and small ball visuals.</p>
+                    </div>
+                    <div>
+                        <div class="score-bar-container"><div id="songoScoreFill" class="score-bar-fill"></div></div>
+                        <p id="songoScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
+                        <button class="btn" onclick="launchGame('songo')" style="width: 100%;">Play Songo</button>
+                    </div>
+                </div>
+
+                <!-- Pirogue Card -->
+                <div class="card game-card">
+                    <div>
+                        <h3>Pirogue Racing (Littoral)</h3>
+                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Wouri river canoe race across long landscapes.</p>
+                    </div>
+                    <div>
+                        <div class="score-bar-container"><div id="pirogueScoreFill" class="score-bar-fill"></div></div>
+                        <p id="pirogueScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
+                        <button class="btn" onclick="launchGame('pirogue')" style="width: 100%;">Play Pirogue</button>
+                    </div>
+                </div>
+
+                <!-- Dochi Card -->
+                <div class="card game-card">
+                    <div>
+                        <h3>Dochi (West Grassfields)</h3>
+                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Two-thrower dodgeball with omnidirectional movement.</p>
+                    </div>
+                    <div>
+                        <div class="score-bar-container"><div id="dochiScoreFill" class="score-bar-fill"></div></div>
+                        <p id="dochiScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
+                        <button class="btn" onclick="launchGame('dochi')" style="width: 100%;">Play Dochi</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Card -->
+                <div class="card game-card">
+                    <div>
+                        <h3>Cultural Trivia Quiz</h3>
+                        <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 5px;">Test your knowledge in a dedicated window to earn Lives & XP!</p>
+                    </div>
+                    <div>
+                        <div class="score-bar-container"><div id="quizScoreFill" class="score-bar-fill"></div></div>
+                        <p id="quizScoreText" style="font-size: 0.85rem; margin-bottom: 10px;">Best Score: 0</p>
+                        <button class="btn btn-yellow" onclick="startQuiz()" style="width: 100%;">Start Quiz Arena</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAMEPLAY SCREEN -->
+        <section id="gameScreen" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 id="gameTitleHeading">Game Arena</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-yellow" onclick="openHelpModal()">Help / Guide</button>
+                    <button class="btn btn-red" onclick="enterDashboard()">Back to Dashboard</button>
+                </div>
+            </div>
+
+            <!-- Difficulty Controls -->
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                <button id="btn-easy" class="btn" onclick="setDifficulty('easy')">Easy</button>
+                <button id="btn-medium" class="btn" onclick="setDifficulty('medium')">Medium</button>
+                <button id="btn-hard" class="btn" onclick="setDifficulty('hard')">Hard</button>
+            </div>
+
+            <div class="game-viewport">
+                <canvas id="gameCanvas" width="700" height="400"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <!-- HELP MODAL -->
+    <div id="helpModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>How to Play</h3>
+            <p id="helpTextContent" style="margin: 1rem 0; line-height: 1.5;"></p>
+            <button class="btn" onclick="closeHelpModal()">Got It</button>
+        </div>
+    </div>
+
+    <!-- CULTURAL QUIZ MODAL WINDOW -->
+    <div id="quizModal" class="modal hidden">
+        <div class="modal-content quiz-modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 id="quizHeaderTitle" style="color: var(--cam-yellow);">Cameroon Cultural Quiz Arena</h3>
+                <span id="quizProgressIndicator" style="font-size: 0.9rem; color: #94A3B8;">Question 1/5</span>
+            </div>
+            
+            <div id="quizRegionTag" style="display: inline-block; background: var(--cam-green); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; font-weight: bold;">Region: Center</div>
+            
+            <p id="quizQuestionText" style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.5;"></p>
+
+            <div class="quiz-options-grid" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem;">
+                <button class="quiz-opt-btn" id="optA" onclick="submitQuizAnswer('A')">A) Option A</button>
+                <button class="quiz-opt-btn" id="optB" onclick="submitQuizAnswer('B')">B) Option B</button>
+                <button class="quiz-opt-btn" id="optC" onclick="submitQuizAnswer('C')">C) Option C</button>
+                <button class="quiz-opt-btn" id="optD" onclick="submitQuizAnswer('D')">D) Option D</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <p id="quizFeedbackMsg" style="font-weight: bold; font-size: 0.95rem;"></p>
+                <button id="quizNextBtn" class="btn hidden" onclick="loadNextQuizQuestion()">Next Question</button>
+            </div>
+            <button class="btn btn-red" onclick="closeQuizModal()" style="margin-top: 1rem; width: 100%;">Quit Quiz</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

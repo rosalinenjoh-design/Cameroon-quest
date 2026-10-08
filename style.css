@@ -1,0 +1,223 @@
+:root {
+    --cam-green: #007A3D;
+    --cam-red: #CE1126;
+    --cam-yellow: #FCD116;
+    --dark-slate: #0F172A;
+    --card-bg: #1E293B;
+    --text-light: #F8FAFC;
+    --accent-gold: #F59E0B;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background-color: var(--dark-slate);
+    color: var(--text-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background: linear-gradient(135deg, var(--cam-green), #064E3B);
+    border-bottom: 4px solid var(--cam-yellow);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.logo-area h1 {
+    font-size: 1.8rem;
+    color: var(--cam-yellow);
+    text-shadow: 2px 2px var(--cam-red);
+}
+
+.logo-area p {
+    font-size: 0.85rem;
+    color: #E2E8F0;
+    letter-spacing: 1px;
+}
+
+.user-badge {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 1px solid var(--cam-yellow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn {
+    background: var(--cam-green);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+}
+
+.btn-yellow {
+    background: var(--cam-yellow);
+    color: var(--dark-slate);
+}
+
+.btn-red {
+    background: var(--cam-red);
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    border: 1px solid rgba(252, 209, 22, 0.2);
+}
+
+/* Auth Screen */
+.auth-container {
+    max-width: 450px;
+    margin: 3rem auto;
+}
+
+.auth-container input, .auth-container select {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0 1.2rem 0;
+    border-radius: 6px;
+    border: 1px solid #475569;
+    background: #0F172A;
+    color: white;
+}
+
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 1rem 0;
+}
+
+.avatar-option {
+    font-size: 1.8rem;
+    padding: 0.5rem;
+    text-align: center;
+    background: #0F172A;
+    border: 2px solid #475569;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.avatar-option.selected {
+    border-color: var(--cam-yellow);
+    background: rgba(252, 209, 22, 0.2);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.game-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.score-bar-container {
+    background: #0F172A;
+    border-radius: 6px;
+    height: 12px;
+    margin: 10px 0;
+    overflow: hidden;
+    border: 1px solid #334155;
+}
+
+.score-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cam-green), var(--cam-yellow));
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+/* Game Canvas Wrappers */
+.game-viewport {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+canvas {
+    background: #090D16;
+    border: 3px solid var(--cam-yellow);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    max-width: 100%;
+}
+
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    border: 2px solid var(--cam-yellow);
+}
