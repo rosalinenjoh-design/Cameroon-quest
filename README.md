@@ -2,7 +2,7 @@
 
 An interactive, responsive web arcade showcasing Cameroonian culture through native games, rich visuals, player dashboards, and quizzes.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **Frontend:** HTML5 Canvas, CSS3, Vanilla JavaScript (ES6+), running independently or served via live server.
 - **Backend API:** Node.js, Express REST API running on **`http://localhost:8000`**.
 - **Database:** SQLite3 (`cameroon_quest.db`) with relational schema for users, game scores, and trivia.
