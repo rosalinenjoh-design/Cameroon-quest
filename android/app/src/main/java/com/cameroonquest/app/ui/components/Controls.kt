@@ -51,6 +51,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +63,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.cameroonquest.app.data.QuestCharacter
+import com.cameroonquest.app.R
+import com.cameroonquest.app.ui.style.CharacterStyle
 import com.cameroonquest.app.ui.theme.Quest
 import com.cameroonquest.app.ui.theme.ShadowedText
 import com.cameroonquest.app.ui.theme.darken
@@ -234,7 +236,12 @@ fun HeaderBar(
             .heightIn(min = 46.dp),
     ) {
         if (onBack != null) {
-            CircleIconButton(Icons.AutoMirrored.Rounded.ArrowBack, "Back", onBack, Modifier.align(Alignment.CenterStart))
+            CircleIconButton(
+                Icons.AutoMirrored.Rounded.ArrowBack,
+                stringResource(R.string.back),
+                onBack,
+                Modifier.align(Alignment.CenterStart),
+            )
         }
         Column(
             Modifier
@@ -358,11 +365,11 @@ fun WoodBanner(title: String, subtitle: String?, modifier: Modifier = Modifier) 
 }
 
 @Composable
-fun RegionBadge(character: QuestCharacter, size: Dp, modifier: Modifier = Modifier, ring: Color = Color.White) {
-    val colors = if (character.darkText) {
-        listOf(character.color.darken(0.3f), character.color.darken(0.5f))
+fun RegionBadge(style: CharacterStyle, size: Dp, modifier: Modifier = Modifier, ring: Color = Color.White) {
+    val colors = if (style.darkText) {
+        listOf(style.color.darken(0.3f), style.color.darken(0.5f))
     } else {
-        listOf(character.color.lighten(0.12f), character.color.darken(0.25f))
+        listOf(style.color.lighten(0.12f), style.color.darken(0.25f))
     }
     Box(
         modifier
@@ -372,7 +379,7 @@ fun RegionBadge(character: QuestCharacter, size: Dp, modifier: Modifier = Modifi
             .border(size * 0.07f, ring, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(character.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(size * 0.56f))
+        Icon(style.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(size * 0.56f))
     }
 }
 

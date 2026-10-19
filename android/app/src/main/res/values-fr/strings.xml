@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Général -->
+    <string name="back">Retour</string>
+    <string name="pause">Pause</string>
+    <string name="cancel">Annuler</string>
+    <string name="start">Commencer</string>
+    <string name="next">Suivant</string>
+    <string name="finish">Terminer</string>
+    <string name="you">Toi</string>
+    <string name="player_two">Joueur 2</string>
+    <string name="level_number">Niveau %1$d</string>
+    <string name="level_word">NIVEAU</string>
+
+    <!-- Accueil -->
+    <string name="welcome_art_description">Cameroon Quest. Joue, découvre, apprends.</string>
+    <string name="welcome_tagline">Explore les 10 régions du Cameroun grâce aux jeux traditionnels et aux questions culturelles\u00A0!</string>
+    <string name="get_started">C’est parti\u00A0!</string>
+
+    <!-- Personnages -->
+    <string name="choose_character_title">Choisis ton personnage</string>
+    <string name="choose_character_subtitle">Chaque personnage représente une région du Cameroun.</string>
+    <string name="choose_named">Choisir %1$s</string>
+    <string name="quote_format">«\u00A0%1$s\u00A0»</string>
+    <string name="about_character">À propos de %1$s</string>
+    <string name="special_skills">Talents spéciaux</string>
+    <string name="select">Choisir</string>
+    <string name="name_title">Comment t’appelles-tu\u00A0?</string>
+    <string name="name_hint">Ton prénom apparaît sur ton profil et dans le classement.</string>
+    <string name="name_label">Ton prénom</string>
+    <string name="lets_go">C’est parti\u00A0!</string>
+
+    <string name="region_littoral">Littoral</string>
+    <string name="region_centre">Centre</string>
+    <string name="region_far_north">Extrême-Nord</string>
+    <string name="region_north_west">Nord-Ouest</string>
+    <string name="region_west">Ouest</string>
+    <string name="region_south_west">Sud-Ouest</string>
+    <string name="region_adamawa">Adamaoua</string>
+    <string name="region_east">Est</string>
+    <string name="region_north">Nord</string>
+    <string name="region_south">Sud</string>
+
+    <string name="skill_speed">Vitesse</string>
+    <string name="skill_focus">Attention</string>
+    <string name="skill_teamwork">Équipe</string>
+    <string name="skill_strategy">Stratégie</string>
+    <string name="skill_wisdom">Sagesse</string>
+    <string name="skill_patience">Patience</string>
+    <string name="skill_endurance">Endurance</string>
+    <string name="skill_creativity">Créativité</string>
+    <string name="skill_rhythm">Rythme</string>
+    <string name="skill_courage">Courage</string>
+    <string name="skill_leadership">Leadership</string>
+    <string name="skill_agility">Agilité</string>
+
+    <!-- Écran d’accueil -->
+    <string name="hello_name">Bonjour, %1$s\u00A0!</string>
+    <string name="open_profile">Ouvrir le profil</string>
+    <string name="your_character">%1$s, ton personnage</string>
+    <string name="play">Jouer</string>
+    <string name="my_progress">Ma progression</string>
+    <string name="leaderboard">Classement</string>
+    <string name="profile">Profil</string>
+    <string name="settings">Réglages</string>
+    <string name="help">Aide</string>
+
+    <!-- Choix du jeu -->
+    <string name="game_selection">Choix du jeu</string>
+    <string name="game_selection_subtitle">Choisis un jeu traditionnel</string>
+    <string name="play_named">Jouer\u00A0: %1$s</string>
+    <string name="quiz_card_subtitle">(10 régions)</string>
+    <string name="level_label">Niveau</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="difficulty_medium">Moyen</string>
+    <string name="difficulty_hard">Difficile</string>
+    <string name="players_label">Joueurs</string>
+    <string name="vs_computer">Ordinateur</string>
+    <string name="two_players">À deux</string>
+    <string name="two_players_note">Deux joueurs partagent ce téléphone. Seule ta progression est enregistrée.</string>
+
+    <!-- Jeux -->
+    <string name="game_songo">Songo</string>
+    <string name="game_pirogue">Course de pirogues</string>
+    <string name="game_dochi">Dochi</string>
+    <string name="game_quiz">Quiz culturel</string>
+    <string name="origin_songo">Beti, région du Centre</string>
+    <string name="origin_pirogue">Sawa, région du Littoral</string>
+    <string name="origin_dochi">Grassfields, Ouest et Nord-Ouest</string>
+    <string name="origin_quiz">Les 10 régions</string>
+    <string name="description_songo">Un jeu de patience et de stratégie. Sème les graines et capture-en plus que ton adversaire.</string>
+    <string name="description_pirogue">Fais la course en pirogue sur le fleuve. Évite les troncs\u00A0: chaque choc te ralentit.</string>
+    <string name="description_dochi">Esquive les balles lancées des deux côtés. Tiens jusqu’à la fin du chrono pour gagner.</string>
+    <string name="description_quiz">Dix questions sur les régions, la cuisine, la musique et les sites du Cameroun.</string>
+    <string name="rules_songo">Chaque camp a cinq trous de cinq graines. Touche un de tes trous pour semer ses graines une à une\u00A0: d’abord en montant dans ta colonne, puis en descendant dans l’autre. Si ta dernière graine tombe dans un trou adverse qui contient alors 2 ou 3 graines, tu les captures, ainsi que celles des trous adverses juste avant qui en contiennent aussi 2 ou 3. Tu ne peux pas capturer toutes les graines de l’adversaire, et tu dois nourrir un camp vide quand c’est possible. Plus de 25 graines capturées, c’est la victoire. La partie s’arrête aussi quand aucun coup n’est possible, quand une position revient trois fois ou après 200 tours\u00A0; chaque camp garde alors ses graines.</string>
+    <string name="rules_pirogue">Les deux pirogues avancent seules à la même vitesse sur le même fleuve. Maintiens les flèches pour éviter les troncs qui flottent. Chaque tronc touché te ralentit un moment. La première pirogue à passer la ligne gagne.</string>
+    <string name="rules_dochi">Deux lanceurs te visent depuis la gauche et la droite. Déplace-toi avec le joystick et tiens jusqu’à la fin du chrono\u00A0: 30 secondes au niveau 1, 40 au niveau 2 et 45 au niveau 3. Plus tu tiens longtemps, plus ton score est élevé.</string>
+    <string name="rules_quiz">Réponds à dix questions. Chaque bonne réponse rapporte 50 points et 10 XP. Il faut au moins 6 bonnes réponses pour gagner.</string>
+
+    <!-- Fenêtres de partie -->
+    <string name="paused">Pause</string>
+    <string name="resume">Reprendre</string>
+    <string name="restart">Recommencer</string>
+    <string name="quit">Quitter</string>
+    <string name="how_to_play">Comment jouer</string>
+    <string name="hide_rules">Masquer les règles</string>
+    <string name="unfinished_not_scored">Les parties non terminées ne comptent pas.</string>
+    <string name="leave_title">Quitter cette partie\u00A0?</string>
+    <string name="leave_message">Cette partie non terminée ne sera pas comptée.</string>
+    <string name="keep_playing">Continuer à jouer</string>
+    <string name="leave_round">Quitter la partie</string>
+    <string name="ready_race">Prêt pour la course\u00A0?</string>
+    <string name="ready_dodge">Prêt\u00A0? Esquive\u00A0!</string>
+    <string name="local_controls_note">Le joueur 1 utilise les deux boutons de gauche, le joueur 2 ceux de droite.</string>
+
+    <!-- Résultats -->
+    <string name="result_win">Bien joué\u00A0!</string>
+    <string name="result_draw">Match nul\u00A0!</string>
+    <string name="result_loss">Continue d’explorer\u00A0!</string>
+    <string name="result_player_wins">%1$s gagne\u00A0!</string>
+    <string name="reward_line">+%1$d XP · +%2$d points</string>
+    <string name="new_best">Nouveau record\u00A0!</string>
+    <string name="level_up">Niveau supérieur\u00A0! Tu es maintenant au niveau %1$d.</string>
+    <string name="badge_unlocked">Badge débloqué\u00A0: %1$s</string>
+    <string name="play_again">Rejouer</string>
+    <string name="back_to_games">Retour aux jeux</string>
+
+    <!-- Songo -->
+    <string name="songo_your_turn">À toi de jouer\u00A0!</string>
+    <string name="songo_named_turn">Au tour de %1$s\u00A0!</string>
+    <string name="songo_choose_pit">Choisis un trou pour déplacer tes graines.</string>
+    <string name="songo_thinking">%1$s réfléchit…</string>
+    <string name="songo_watch">Regarde où tombent les graines.</string>
+    <string name="songo_captured">%1$s a capturé %2$s\u00A0!</string>
+    <string name="songo_round_over">Partie terminée</string>
+    <string name="songo_pit_description">Trou %2$d de %1$s, %3$s</string>
+    <string name="sow_pit">Semer ce trou</string>
+    <string name="songo_end_majority">Un camp a capturé plus de la moitié des graines.</string>
+    <string name="songo_end_no_moves">Plus aucun coup n’était possible\u00A0: chaque camp garde les graines de son côté.</string>
+    <string name="songo_end_repetition">La même position est revenue trois fois\u00A0: chaque camp garde ses graines.</string>
+    <string name="songo_end_move_limit">200 tours ont été joués\u00A0: chaque camp garde ses graines.</string>
+    <plurals name="seeds_count">
+        <item quantity="one">%1$d graine</item>
+        <item quantity="many">%1$d graines</item>
+        <item quantity="other">%1$d graines</item>
+    </plurals>
+
+    <!-- Course de pirogues -->
+    <string name="pirogue_result_description">La première pirogue à passer la ligne gagne. Les deux ont couru sur le même fleuve.</string>
+    <string name="pirogue_score_line">%1$d pts\n%2$s</string>
+    <string name="steer_left">%1$s tourne à gauche</string>
+    <string name="steer_right">%1$s tourne à droite</string>
+    <plurals name="logs_hit">
+        <item quantity="one">%1$d tronc touché</item>
+        <item quantity="many">%1$d troncs touchés</item>
+        <item quantity="other">%1$d troncs touchés</item>
+    </plurals>
+
+    <!-- Dochi -->
+    <string name="dochi_hint">Déplace-toi avec le joystick. Évite les balles\u00A0!</string>
+    <string name="dochi_survived_all">Tu as tenu les %1$d secondes\u00A0!</string>
+    <string name="dochi_caught">Un lanceur t’a touché après %1$.1f secondes. Bouge sans arrêt et réessaie.</string>
+    <string name="survived">Temps tenu</string>
+    <string name="score">Score</string>
+    <string name="joystick">Joystick de déplacement</string>
+
+    <!-- Quiz -->
+    <string name="cultural_question">Question culturelle</string>
+    <string name="correct_feedback">Bravo\u00A0! %1$s</string>
+    <string name="wrong_feedback">Pas tout à fait. %1$s</string>
+    <string name="correct_answer">Bonne réponse</string>
+    <string name="wrong_answer">Mauvaise réponse</string>
+    <string name="quiz_win_description">Tu connais bien le Cameroun\u00A0! Chaque bonne réponse rapporte 10 XP.</string>
+    <string name="quiz_loss_description">Il faut %1$d bonnes réponses ou plus pour gagner. Chaque bonne réponse rapporte quand même 10 XP.</string>
+    <string name="correct_label">Bonnes réponses</string>
+    <string name="region_of">La région de %1$s</string>
+    <string name="quiz_picture">Illustration de la question</string>
+
+    <!-- Profil, classement et progression -->
+    <string name="my_profile">Mon profil</string>
+    <string name="total_score">Score total</string>
+    <string name="games_played">Parties jouées</string>
+    <string name="region">Région</string>
+    <string name="badges">Badges</string>
+    <string name="change_character">Changer de personnage</string>
+    <string name="home">Accueil</string>
+    <string name="games">Jeux</string>
+    <string name="progress">Progression</string>
+    <string name="more">Plus</string>
+    <string name="champions">Champions</string>
+    <string name="my_bests">Mes records</string>
+    <string name="champions_intro">Bats les champions des dix régions\u00A0! Chaque partie terminée s’ajoute à ton score total.</string>
+    <string name="you_suffix">%1$s (Toi)</string>
+    <string name="best">Record</string>
+    <string name="xp_in_level">%1$d / %2$d XP dans ce niveau</string>
+    <string name="xp_to_next">%1$d XP avant le niveau %2$d</string>
+    <string name="wins">Victoires</string>
+    <string name="total_xp">XP total</string>
+    <string name="earned">Obtenu</string>
+    <string name="locked">Verrouillé</string>
+    <string name="badge_locked_description">%1$s (verrouillé)</string>
+    <string name="badge_first_victory">Première victoire</string>
+    <string name="badge_first_victory_description">Gagne n’importe quelle partie.</string>
+    <string name="badge_songo_master">Maître du Songo</string>
+    <string name="badge_songo_master_description">Bats l’ordinateur au Songo au niveau 3.</string>
+    <string name="badge_culture_scholar">Expert culturel</string>
+    <string name="badge_culture_scholar_description">Réponds juste aux dix questions du quiz.</string>
+    <plurals name="played_times">
+        <item quantity="one">Joué %1$d fois</item>
+        <item quantity="many">Joué %1$d fois</item>
+        <item quantity="other">Joué %1$d fois</item>
+    </plurals>
+
+    <!-- Réglages -->
+    <string name="player_section">Joueur</string>
+    <string name="name">Prénom</string>
+    <string name="character">Personnage</string>
+    <string name="preferences">Préférences</string>
+    <string name="vibration">Vibration</string>
+    <string name="vibration_detail">Petites vibrations quand tu touches l’écran et pendant les jeux.</string>
+    <string name="language">Langue</string>
+    <string name="language_detail">Choisis la langue de l’application.</string>
+    <string name="how_to_play_detail">Les règles de chaque jeu et les récompenses.</string>
+    <string name="data_section">Données</string>
+    <string name="reset_progress">Réinitialiser la progression</string>
+    <string name="reset_detail">Efface ton prénom, ton personnage, tes XP et tes scores de ce téléphone.</string>
+    <string name="reset_title">Tout réinitialiser\u00A0?</string>
+    <string name="reset_message">Ton prénom, ton personnage, tes XP, tes scores et tes badges seront effacés de ce téléphone. C’est définitif.</string>
+    <string name="reset">Réinitialiser</string>
+    <string name="about">À propos</string>
+    <string name="about_text">La progression est enregistrée uniquement sur ce téléphone. Les illustrations viennent de la maquette de Cameroon Quest. Police\u00A0: Fredoka, licence SIL Open Font License 1.1.</string>
+
+    <!-- Aide -->
+    <string name="help_welcome_title">Bienvenue dans Cameroon Quest\u00A0!</string>
+    <string name="help_welcome_text">Choisis un personnage, joue à des jeux traditionnels et réponds à des questions culturelles. Chaque partie terminée te donne des XP (%1$d XP = 1 niveau) et s’ajoute à ton score total dans le classement.</string>
+    <string name="rewards">Récompenses</string>
+    <string name="rewards_text">Victoire\u00A0: 50 XP · Nul\u00A0: 25 XP · Défaite\u00A0: 10 XP. Au quiz, chaque bonne réponse donne 10 XP et 50 points.</string>
+    <string name="two_players_title">À deux</string>
+    <string name="two_players_text">Le Songo et la Course de pirogues se jouent à deux sur le même téléphone. Seule ta progression est enregistrée.</string>
+</resources>

@@ -1,4 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cameroon Quest</string>
+    <!-- Not translated -->
+    <string name="app_name" translatable="false">Cameroon Quest</string>
+    <string name="about_version" translatable="false">Cameroon Quest 1.0</string>
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_french" translatable="false">Français</string>
+    <string name="xp_progress" translatable="false">%1$d / %2$d XP</string>
+    <string name="fraction" translatable="false">%1$d / %2$d</string>
+    <string name="seconds_value" translatable="false">%1$.1f s</string>
+    <string name="character_line" translatable="false">%1$s · %2$s</string>
+
+    <!-- General -->
+    <string name="back">Back</string>
+    <string name="pause">Pause</string>
+    <string name="cancel">Cancel</string>
+    <string name="start">Start</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish</string>
+    <string name="you">You</string>
+    <string name="player_two">Player 2</string>
+    <string name="level_number">Level %1$d</string>
+    <string name="level_word">LEVEL</string>
+
+    <!-- Welcome -->
+    <string name="welcome_art_description">Cameroon Quest. Play, discover, learn.</string>
+    <string name="welcome_tagline">Explore Cameroon’s 10 regions through traditional games and cultural questions!</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- Characters -->
+    <string name="choose_character_title">Choose Your Character</string>
+    <string name="choose_character_subtitle">Each character represents a region of Cameroon.</string>
+    <string name="choose_named">Choose %1$s</string>
+    <string name="quote_format">“%1$s”</string>
+    <string name="about_character">About %1$s</string>
+    <string name="special_skills">Special Skills</string>
+    <string name="select">Select</string>
+    <string name="name_title">What’s your name?</string>
+    <string name="name_hint">It appears on your profile and on the leaderboard.</string>
+    <string name="name_label">Your name</string>
+    <string name="lets_go">Let’s go!</string>
+
+    <string name="region_littoral">Littoral</string>
+    <string name="region_centre">Centre</string>
+    <string name="region_far_north">Far North</string>
+    <string name="region_north_west">North-West</string>
+    <string name="region_west">West</string>
+    <string name="region_south_west">South-West</string>
+    <string name="region_adamawa">Adamawa</string>
+    <string name="region_east">East</string>
+    <string name="region_north">North</string>
+    <string name="region_south">South</string>
+
+    <string name="skill_speed">Speed</string>
+    <string name="skill_focus">Focus</string>
+    <string name="skill_teamwork">Teamwork</string>
+    <string name="skill_strategy">Strategy</string>
+    <string name="skill_wisdom">Wisdom</string>
+    <string name="skill_patience">Patience</string>
+    <string name="skill_endurance">Endurance</string>
+    <string name="skill_creativity">Creativity</string>
+    <string name="skill_rhythm">Rhythm</string>
+    <string name="skill_courage">Courage</string>
+    <string name="skill_leadership">Leadership</string>
+    <string name="skill_agility">Agility</string>
+
+    <!-- Home -->
+    <string name="hello_name">Hello, %1$s!</string>
+    <string name="open_profile">Open profile</string>
+    <string name="your_character">%1$s, your character</string>
+    <string name="play">Play</string>
+    <string name="my_progress">My Progress</string>
+    <string name="leaderboard">Leaderboard</string>
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+    <string name="help">Help</string>
+
+    <!-- Game selection -->
+    <string name="game_selection">Game Selection</string>
+    <string name="game_selection_subtitle">Choose a traditional game to play</string>
+    <string name="play_named">Play %1$s</string>
+    <string name="quiz_card_subtitle">(10 regions)</string>
+    <string name="level_label">Level</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="players_label">Players</string>
+    <string name="vs_computer">vs Computer</string>
+    <string name="two_players">2 Players</string>
+    <string name="two_players_note">Two players share this phone. Only your progress is saved.</string>
+
+    <!-- Games -->
+    <string name="game_songo">Songo</string>
+    <string name="game_pirogue">Pirogue Racing</string>
+    <string name="game_dochi">Dochi</string>
+    <string name="game_quiz">Cultural Quiz</string>
+    <string name="origin_songo">Beti, Centre region</string>
+    <string name="origin_pirogue">Sawa, Littoral region</string>
+    <string name="origin_dochi">Grassfields, West and North-West</string>
+    <string name="origin_quiz">All 10 regions</string>
+    <string name="description_songo">A game of patience and strategy. Sow seeds and capture more than your opponent.</string>
+    <string name="description_pirogue">Race a dugout canoe on the river. Steer around logs: each collision slows you down.</string>
+    <string name="description_dochi">Dodge the balls thrown from both sides. Survive until the timer runs out to win.</string>
+    <string name="description_quiz">Ten questions about Cameroon’s regions, food, music and landmarks.</string>
+    <string name="rules_songo">Each side has five pits with five seeds. Tap one of your pits to sow its seeds one by one: up your column, then down the other one. If your last seed lands in an opposing pit that now holds 2 or 3 seeds, you capture them, plus the opposing pits just before it that also hold 2 or 3. You may not capture every seed on the other side, and you must feed an empty side when you can. More than 25 captured seeds wins. The round also ends when no move is possible, a position repeats three times, or after 200 turns; each side then keeps its own seeds.</string>
+    <string name="rules_pirogue">Both canoes paddle by themselves at the same speed and race on the same river. Hold the arrow buttons to steer around the floating logs. Each log you hit slows you down for a moment. The first canoe across the line wins.</string>
+    <string name="rules_dochi">Two throwers aim balls at you from the left and the right. Move with the joystick and stay alive until the timer ends: 30 seconds on level 1, 40 on level 2 and 45 on level 3. The longer you survive, the higher your score.</string>
+    <string name="rules_quiz">Answer ten questions. Each correct answer earns 50 points and 10 XP. Get at least 6 right to win the round.</string>
+
+    <!-- Round dialogs -->
+    <string name="paused">Paused</string>
+    <string name="resume">Resume</string>
+    <string name="restart">Restart</string>
+    <string name="quit">Quit</string>
+    <string name="how_to_play">How to play</string>
+    <string name="hide_rules">Hide rules</string>
+    <string name="unfinished_not_scored">Unfinished rounds are not scored.</string>
+    <string name="leave_title">Leave this round?</string>
+    <string name="leave_message">This unfinished round will not be scored.</string>
+    <string name="keep_playing">Keep playing</string>
+    <string name="leave_round">Leave round</string>
+    <string name="ready_race">Ready to race?</string>
+    <string name="ready_dodge">Ready, set, dodge!</string>
+    <string name="local_controls_note">Player 1 uses the two left buttons, Player 2 the two right buttons.</string>
+
+    <!-- Results -->
+    <string name="result_win">Well played!</string>
+    <string name="result_draw">An even match!</string>
+    <string name="result_loss">Keep exploring!</string>
+    <string name="result_player_wins">%1$s wins!</string>
+    <string name="reward_line">+%1$d XP · +%2$d points</string>
+    <string name="new_best">New best score!</string>
+    <string name="level_up">Level up! You are now Level %1$d.</string>
+    <string name="badge_unlocked">Badge unlocked: %1$s</string>
+    <string name="play_again">Play again</string>
+    <string name="back_to_games">Back to games</string>
+
+    <!-- Songo -->
+    <string name="songo_your_turn">Your turn!</string>
+    <string name="songo_named_turn">%1$s’s turn!</string>
+    <string name="songo_choose_pit">Choose a pit to move your stones.</string>
+    <string name="songo_thinking">%1$s is thinking…</string>
+    <string name="songo_watch">Watch where the seeds land.</string>
+    <string name="songo_captured">%1$s captured %2$s!</string>
+    <string name="songo_round_over">Round over</string>
+    <string name="songo_pit_description">%1$s pit %2$d, %3$s</string>
+    <string name="sow_pit">Sow this pit</string>
+    <string name="songo_end_majority">One side captured more than half of the seeds.</string>
+    <string name="songo_end_no_moves">No move was possible, so each side keeps the seeds on its own side.</string>
+    <string name="songo_end_repetition">The same position came back three times, so each side keeps its own seeds.</string>
+    <string name="songo_end_move_limit">200 turns were played, so each side keeps its own seeds.</string>
+    <plurals name="seeds_count">
+        <item quantity="one">%1$d seed</item>
+        <item quantity="other">%1$d seeds</item>
+    </plurals>
+
+    <!-- Pirogue -->
+    <string name="pirogue_result_description">First across the line wins. Both canoes raced on the same river.</string>
+    <string name="pirogue_score_line">%1$d pts\n%2$s</string>
+    <string name="steer_left">%1$s steer left</string>
+    <string name="steer_right">%1$s steer right</string>
+    <plurals name="logs_hit">
+        <item quantity="one">%1$d log hit</item>
+        <item quantity="other">%1$d logs hit</item>
+    </plurals>
+
+    <!-- Dochi -->
+    <string name="dochi_hint">Move with the joystick. Stay away from the balls!</string>
+    <string name="dochi_survived_all">You survived all %1$d seconds!</string>
+    <string name="dochi_caught">A thrower got you after %1$.1f seconds. Keep moving and try again.</string>
+    <string name="survived">Survived</string>
+    <string name="score">Score</string>
+    <string name="joystick">Movement joystick</string>
+
+    <!-- Quiz -->
+    <string name="cultural_question">Cultural Question</string>
+    <string name="correct_feedback">Correct! %1$s</string>
+    <string name="wrong_feedback">Not quite. %1$s</string>
+    <string name="correct_answer">Correct answer</string>
+    <string name="wrong_answer">Wrong answer</string>
+    <string name="quiz_win_description">Great knowledge of Cameroon! Every correct answer earns 10 XP.</string>
+    <string name="quiz_loss_description">Get %1$d or more right to win. Every correct answer still earns 10 XP.</string>
+    <string name="correct_label">Correct</string>
+    <string name="region_of">%1$s’s region</string>
+    <string name="quiz_picture">Illustration for the question</string>
+
+    <!-- Profile, leaderboard and progress -->
+    <string name="my_profile">My Profile</string>
+    <string name="total_score">Total Score</string>
+    <string name="games_played">Games Played</string>
+    <string name="region">Region</string>
+    <string name="badges">Badges</string>
+    <string name="change_character">Change character</string>
+    <string name="home">Home</string>
+    <string name="games">Games</string>
+    <string name="progress">Progress</string>
+    <string name="more">More</string>
+    <string name="champions">Champions</string>
+    <string name="my_bests">My Bests</string>
+    <string name="champions_intro">Beat the champions of the ten regions! Every game you finish adds to your total score.</string>
+    <string name="you_suffix">%1$s (You)</string>
+    <string name="best">Best</string>
+    <string name="xp_in_level">%1$d / %2$d XP in this level</string>
+    <string name="xp_to_next">%1$d XP to Level %2$d</string>
+    <string name="wins">Wins</string>
+    <string name="total_xp">Total XP</string>
+    <string name="earned">Earned</string>
+    <string name="locked">Locked</string>
+    <string name="badge_locked_description">%1$s (locked)</string>
+    <string name="badge_first_victory">First Victory</string>
+    <string name="badge_first_victory_description">Win any game.</string>
+    <string name="badge_songo_master">Songo Master</string>
+    <string name="badge_songo_master_description">Beat the computer at Songo on level 3.</string>
+    <string name="badge_culture_scholar">Culture Scholar</string>
+    <string name="badge_culture_scholar_description">Answer all ten quiz questions correctly.</string>
+    <plurals name="played_times">
+        <item quantity="one">Played %1$d time</item>
+        <item quantity="other">Played %1$d times</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="player_section">Player</string>
+    <string name="name">Name</string>
+    <string name="character">Character</string>
+    <string name="preferences">Preferences</string>
+    <string name="vibration">Vibration</string>
+    <string name="vibration_detail">Short vibrations on taps and game events.</string>
+    <string name="language">Language</string>
+    <string name="language_detail">Choose the language of the app.</string>
+    <string name="how_to_play_detail">Rules of every game and how rewards work.</string>
+    <string name="data_section">Data</string>
+    <string name="reset_progress">Reset progress</string>
+    <string name="reset_detail">Deletes your name, character, XP and scores from this phone.</string>
+    <string name="reset_title">Reset all progress?</string>
+    <string name="reset_message">Your name, character, XP, scores and badges will be deleted from this phone. This cannot be undone.</string>
+    <string name="reset">Reset</string>
+    <string name="about">About</string>
+    <string name="about_text">Progress is saved only on this phone. Artwork comes from the Cameroon Quest design mockup. Font: Fredoka, SIL Open Font License 1.1.</string>
+
+    <!-- Help -->
+    <string name="help_welcome_title">Welcome to Cameroon Quest!</string>
+    <string name="help_welcome_text">Choose a character, play traditional games and answer cultural questions. Every finished game gives you XP (%1$d XP = 1 level) and adds to your total score on the leaderboard.</string>
+    <string name="rewards">Rewards</string>
+    <string name="rewards_text">Win: 50 XP · Draw: 25 XP · Loss: 10 XP. In the quiz, each correct answer gives 10 XP and 50 points.</string>
+    <string name="two_players_title">Two players</string>
+    <string name="two_players_text">Songo and Pirogue Racing can be played by two people on the same phone. Only your own progress is saved.</string>
 </resources>
