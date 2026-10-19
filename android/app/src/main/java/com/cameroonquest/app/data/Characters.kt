@@ -1,10 +1,10 @@
 package com.cameroonquest.app.data
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
 import androidx.compose.material.icons.rounded.AccountBalance
 import androidx.compose.material.icons.rounded.BeachAccess
 import androidx.compose.material.icons.rounded.Bolt
-import androidx.compose.material.icons.rounded.DirectionsRun
 import androidx.compose.material.icons.rounded.Eco
 import androidx.compose.material.icons.rounded.FitnessCenter
 import androidx.compose.material.icons.rounded.Flag
@@ -28,7 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.cameroonquest.app.R
 
 enum class Skill(val label: String, val icon: ImageVector) {
-    Speed("Speed", Icons.Rounded.DirectionsRun),
+    Speed("Speed", Icons.AutoMirrored.Rounded.DirectionsRun),
     Focus("Focus", Icons.Rounded.GpsFixed),
     Teamwork("Teamwork", Icons.Rounded.Groups),
     Strategy("Strategy", Icons.Rounded.Psychology),

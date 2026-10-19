@@ -70,7 +70,8 @@ val Fredoka = FontFamily(
 
 val TextShadow = Shadow(color = Color(0x99000000), offset = Offset(0f, 3f), blurRadius = 6f)
 
-val ShadowedText = TextStyle(shadow = TextShadow)
+/** Passing a style replaces the theme style, so it must carry the font family itself. */
+val ShadowedText = TextStyle(fontFamily = Fredoka, shadow = TextShadow)
 
 private fun TextStyle.fredoka() = copy(fontFamily = Fredoka)
 

@@ -255,7 +255,7 @@ class TornPaperShape(private val corner: Dp = 22.dp, private val roughness: Dp =
 }
 
 /** Fades the content out towards the end and/or bottom edge so artwork blends into its background. */
-fun Modifier.fadeOut(toEnd: Boolean = false, toBottom: Boolean = false, from: Float = 0.72f): Modifier = this
+fun Modifier.fadeEdges(toEnd: Boolean = false, toBottom: Boolean = false, from: Float = 0.72f): Modifier = this
     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     .drawWithContent {
         drawContent()
